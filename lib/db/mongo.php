@@ -25,7 +25,8 @@ class Mongo extends \MongoDB {
 		@param $options array
 	**/
 	function __construct($dsn,$dbname,array $options=NULL) {
-		parent::__construct(new \Mongo($dsn,$options?:array()),$dbname);
+		$class=class_exists('\MongoClient')?'\MongoClient':'\Mongo';
+		parent::__construct(new $class($dsn,$options?:array()),$dbname);
 	}
 
 }
