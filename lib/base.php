@@ -19,7 +19,7 @@ final class Base {
 	//@{ Framework details
 	const
 		PACKAGE='Fat-Free Framework',
-		VERSION='3.0.3-dev';
+		VERSION='3.0.3-Dev';
 	//@}
 
 	//@{ HTTP status codes (RFC 2616)
@@ -440,7 +440,7 @@ final class Base {
 				if (method_exists($arg,'__tostring'))
 					return stripslashes($arg);
 				$str='';
-				if ($this->hive['DEBUG']>2 || get_class($arg)!=__CLASS__)
+				if ($this->hive['DEBUG']>2)
 					foreach ((array)$arg as $key=>$val)
 						$str.=($str?',':'').$this->stringify(
 							preg_replace('/[\x00].+?[\x00]/','',$key)).'=>'.
@@ -937,7 +937,7 @@ final class Base {
 		// Convert to BASE-relative URL
 		$req=preg_replace(
 			'/^'.preg_quote($this->hive['BASE'],'/').'\b(.+)/','\1',
-			rawurldecode($this->hive['URI'])
+			$this->hive['URI']
 		);
 		$allowed=array();
 		$case=$this->hive['CASELESS']?'i':'';

@@ -122,7 +122,7 @@ class Router extends Controller {
 		);
 		$f3->mock('GET /food/%C3%B6%C3%A4%C3%BC/123');
 		$test->expect(
-			$f3->get('id')=='öäü' && $f3->get('quantity')==123,
+			rawurldecode($f3->get('id'))=='öäü' && $f3->get('quantity')==123,
 			'Unicode characters in URL (PCRE version: '.PCRE_VERSION.')'
 		);
 		$f3->clear('ROUTES');
