@@ -966,13 +966,12 @@ final class Base {
 					// Replace route pattern tokens in handler if any
 					$handler=preg_replace_callback('/@(\w+\b)/',
 						function($id) use($args) {
-							return rawurldecode(
-								isset($args[$id[1]])?$args[$id[1]]:$id[0]);
+							return isset($args[$id[1]])?$args[$id[1]]:$id[0];
 						},
 						$handler
 					);
 				// Capture values of route pattern tokens
-				$this->hive['PARAMS']=$args;
+				$this->hive['PARAMS']=$args=array_map('urldecode',$args);
 				// Save matching route
 				$this->hive['PATTERN']=$url;
 				// Process request
