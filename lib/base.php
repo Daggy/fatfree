@@ -966,7 +966,8 @@ final class Base {
 					// Replace route pattern tokens in handler if any
 					$handler=preg_replace_callback('/@(\w+\b)/',
 						function($id) use($args) {
-							return isset($args[$id[1]])?$args[$id[1]]:$id[0];
+							return rawurldecode(
+								isset($args[$id[1]])?$args[$id[1]]:$id[0]);
 						},
 						$handler
 					);
