@@ -201,30 +201,10 @@ final class Base {
 				break;
 			case 'LANGUAGE':
 				$val=$this->language($val);
+				$lex=$this->locales($this->hive['LOCALES']);
 			case 'LOCALES':
-				foreach ($this->languages as $language) {
-					$base=$val.$language;
-					if ((is_file($file=$base.'.php') ||
-						is_file($file=strtolower($base).'.php')) &&
-						is_array($dict=require($file)))
-						$this->mset($dict,NULL,$ttl);
-					elseif (is_file($file=$base.'.ini')) {
-						preg_match_all(
-							'/(?<=^|\n)'.
-							'(?:;.*?)|(?:<\?php.+\?>?)|'.
-							'(.+?)[[:blank:]]*=[[:blank:]]*'.
-							'((?:\\\\[[:blank:]\r]*\n|[^\n])*)'.
-							'(?=\n|$)/',
-							file_get_contents($file),$matches,PREG_SET_ORDER);
-						if ($matches)
-							foreach ($matches as $match)
-								if (isset($match[1]))
-									$this->set($match[1],
-										preg_replace(
-											'/\\\\[[:blank:]\r]*\n/','',
-											$match[2]));
-					}
-				}
+				if (isset($lex) || $lex=$this->locales($val))
+					$this->mset($lex,NULL,$ttl);
 				break;
 			case 'TZ':
 				date_default_timezone_set($val);
@@ -691,6 +671,37 @@ final class Base {
 	}
 
 	/**
+		Transfer lexicon entries to hive
+		@return NULL
+		@param $path string
+	**/
+	function locales($path) {
+		$lex=array();
+		foreach ($this->languages as $language) {
+			if ((is_file($file=($base=$path.$language).'.php') ||
+				is_file($file=strtolower($base).'.php')) &&
+				is_array($dict=require($file)))
+				$lex+=$dict;
+			elseif (is_file($file=$base.'.ini')) {
+				preg_match_all(
+					'/(?<=^|\n)(?:'.
+					'(?:;.*?)|(?:<\?php.+\?>?)|'.
+					'(.+?)[[:blank:]]*=[[:blank:]]*'.
+					'((?:\\\\[[:blank:]\r]*\n|[^\n])*)'.
+					')(?=\r?\n|$)/',
+					file_get_contents($file),$matches,PREG_SET_ORDER);
+				if ($matches)
+					foreach ($matches as $match)
+						if (isset($match[1]) &&
+							!array_key_exists($match[1],$lex))
+							$lex[$match[1]]=preg_replace(
+								'/\\\\[[:blank:]\r]*\n/','',$match[2]);
+			}
+		}
+		return $lex;
+	}
+
+	/**
 		Return string representation of PHP value
 		@return string
 		@param $arg mixed
@@ -1117,12 +1128,12 @@ final class Base {
 	**/
 	function config($file) {
 		preg_match_all(
-			'/(?<=^|\n)'.
+			'/(?<=^|\n)(?:'.
 			'(?:;.*?)|(?:<\?php.+\?>?)|'.
 			'(?:\[(.+?)\])|'.
 			'(.+?)[[:blank:]]*=[[:blank:]]*'.
 			'((?:\\\\[[:blank:]\r]*\n|.+?)*)'.
-			'(?=\r?\n|$)/',
+			')(?=\r?\n|$)/',
 			file_get_contents($file),$matches,PREG_SET_ORDER);
 		if ($matches) {
 			$sec='globals';
