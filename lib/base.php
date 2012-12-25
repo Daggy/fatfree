@@ -652,12 +652,8 @@ final class Base {
 		@return string
 		@param $code string
 	**/
-	function language($code=NULL) {
+	function language($code) {
 		$this->languages=array(self::FALLBACK);
-		// Use Accept-Language header, if available
-		$headers=$this->hive['HEADERS'];
-		if (!$code && isset($headers['Accept-Language']))
-			$code=str_replace('-','_',$headers['Accept-Language']);
 		// Validate string/header
 		if (!preg_match('/^(\w{2})(?:_(\w{2}))?\b/',$code,$parts))
 			return self::FALLBACK;
@@ -1408,7 +1404,10 @@ final class Base {
 					(isset($_SERVER['REMOTE_ADDR'])?
 						$_SERVER['REMOTE_ADDR']:'')),
 			'JAR'=>$jar,
-			'LANGUAGE'=>$this->language(),
+			'LANGUAGE'=>$this->language(
+				isset($headers['Accept-Language'])?
+					str_replace('-','_',$headers['Accept-Language']):
+					self::FALLBACK),
 			'LOCALES'=>'./',
 			'LOGS'=>'./',
 			'ONERROR'=>NULL,
