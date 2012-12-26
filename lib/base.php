@@ -1616,7 +1616,7 @@ final class Cache {
 					apc_delete($item['key_name']);
 				return TRUE;
 			case 'xcache':
-				return TRUE; // Not supported
+				return TRUE; /* Not supported */
 			case 'folder':
 				foreach (glob($parts[1].'*') as $file)
 					if (preg_match($regex,basename($file)) &&

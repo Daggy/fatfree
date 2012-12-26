@@ -144,8 +144,8 @@ class Router extends Controller {
 			function($f3) {
 				$f3->set('message','Perfect wealth becomes me');
 			},
-			0, // don't cache
-			$throttle=16 // 8Kbps
+			0, /* don't cache */
+			$throttle=16 /* 8Kbps */
 		);
 		$f3->mock('GET /throttled');
 		$test->expect(
