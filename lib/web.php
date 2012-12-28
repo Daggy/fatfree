@@ -365,8 +365,6 @@ class Web extends Prefab {
 		if (!$mime)
 			$mime=$this->mime($files[0]);
 		preg_match('/\w+$/',$files[0],$ext);
-		if (!is_dir($tmp=$fw->get('TEMP')))
-			$fw->mkdir($tmp);
 		$cache=Cache::instance();
 		$dst='';
 		foreach ($fw->split($fw->get('UI')) as $dir)
