@@ -25,7 +25,7 @@ class Image extends Controller {
 			'<img src="'.$src.'" title="Identicon" />'
 		);
 		$f3->set('file','images/south-park.jpg');
-		$img=new \Image($f3->get('file'));
+		$img=new \Image($f3->get('file'),TRUE);
 		$test->expect(
 			$orig=\View::instance()->render('image.htm'),
 			'Original image rendered from template<br />'.$orig
