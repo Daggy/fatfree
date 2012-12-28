@@ -681,9 +681,9 @@ final class Base {
 			elseif (is_file($file=$base.'.ini')) {
 				preg_match_all(
 					'/(?<=^|\n)(?:'.
-					'(?:;.*?)|(?:<\?php.+\?>?)|'.
-					'(.+?)[[:blank:]]*=[[:blank:]]*'.
-					'((?:\\\\[[:blank:]\r]*\n|[^\n])*)'.
+					'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
+					'(.+?)[ \t]*=[ \t]*'.
+					'((?:\\\\[ \t]*\r?\n|.+?)*)'.
 					')(?=\r?\n|$)/',
 					file_get_contents($file),$matches,PREG_SET_ORDER);
 				if ($matches)
@@ -691,7 +691,7 @@ final class Base {
 						if (isset($match[1]) &&
 							!array_key_exists($match[1],$lex))
 							$lex[$match[1]]=preg_replace(
-								'/\\\\[[:blank:]\r]*\n/','',$match[2]);
+								'/\\\\[ \t]*\r?\n/','',$match[2]);
 			}
 		}
 		return $lex;
@@ -1125,10 +1125,10 @@ final class Base {
 	function config($file) {
 		preg_match_all(
 			'/(?<=^|\n)(?:'.
-			'(?:;.*?)|(?:<\?php.+\?>?)|'.
+			'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
 			'(?:\[(.+?)\])|'.
-			'(.+?)[[:blank:]]*=[[:blank:]]*'.
-			'((?:\\\\[[:blank:]\r]*\n|.+?)*)'.
+			'(.+?)[ \t]*=[ \t]*'.
+			'((?:\\\\[ \t]*\r?\n|.+?)*)'.
 			')(?=\r?\n|$)/',
 			file_get_contents($file),$matches,PREG_SET_ORDER);
 		if ($matches) {
@@ -1154,7 +1154,7 @@ final class Base {
 									defined($val))
 									return constant($val);
 								return preg_replace(
-									'/\\\\[[:blank:]\r]*\n/','',$val);
+									'/\\\\[ \t]*\r?\n/','',$val);
 							},
 							str_getcsv(
 								// Mark quoted strings with 0x00 whitespace
