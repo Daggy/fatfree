@@ -36,6 +36,8 @@ class Image {
 		$file,
 		//! Image resource
 		$data,
+		//! Enable/disable history
+		$flag=FALSE,
 		//! Filter count
 		$count=0;
 
@@ -428,13 +430,15 @@ class Image {
 	**/
 	function save() {
 		$fw=Base::instance();
-		if (!is_dir($dir=$fw->get('TEMP')))
-			mkdir($dir,Base::MODE,TRUE);
-		$this->count++;
-		$fw->write($dir.'/'.
-			$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
-			$fw->hash($this->file).'-'.$this->count.'.png',
-			$this->dump());
+		if ($this->flag) {
+			if (!is_dir($dir=$fw->get('TEMP')))
+				mkdir($dir,Base::MODE,TRUE);
+			$this->count++;
+			$fw->write($dir.'/'.
+				$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
+				$fw->hash($this->file).'-'.$this->count.'.png',
+				$this->dump());
+		}
 		return $this;
 	}
 
@@ -445,7 +449,7 @@ class Image {
 	**/
 	function restore($state=1) {
 		$fw=Base::instance();
-		if (is_file($file=($path=$fw->get('TEMP').
+		if ($this->flag && is_file($file=($path=$fw->get('TEMP').
 			$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
 			$fw->hash($this->file).'-').$state.'.png')) {
 			if (is_resource($this->data))
@@ -466,16 +470,21 @@ class Image {
 		@return object
 	**/
 	function undo() {
-		if ($this->count)
-			$this->count--;
-		return $this->restore($this->count);
+		if ($this->flag) {
+			if ($this->count)
+				$this->count--;
+			return $this->restore($this->count);
+		}
+		return $this;
 	}
 
 	/**
 		Instantiate image
 		@param $file string
+		@param $flag bool
 	**/
-	function __construct($file=NULL) {
+	function __construct($file=NULL,$flag=FALSE) {
+		$this->flag=$flag;
 		if ($file) {
 			$fw=Base::instance();
 			// Create image from file
