@@ -367,15 +367,19 @@ class Web extends Prefab {
 		preg_match('/\w+$/',$files[0],$ext);
 		if (!is_dir($tmp=$fw->get('TEMP')))
 			$fw->mkdir($tmp);
+		$cache=Cache::instance();
 		$dst='';
 		foreach ($fw->split($fw->get('UI')) as $dir)
 			foreach ($files as $file)
-				if (is_file($min=$fw->fixslashes($dir.$file))) {
-					if (!is_file($save=($tmp.'/'.
-						$fw->hash($fw->get('ROOT').$fw->get('BASE')).'.'.
-						$fw->hash($min).'.'.$ext[0])) ||
-						filemtime($save)<filemtime($min)) {
-						$src=$fw->read($min);
+				if (is_file($save=$fw->fixslashes($dir.$file))) {
+					if ($fw->get('CACHE') &&
+						($cached=$cache->exists(
+							$hash=$fw->hash($fw->get('ROOT').
+							$fw->get('BASE')).'.'.$fw->hash($save),$data)) &&
+						$cached>filemtime($save))
+						$dst=$cache->get($hash);
+					else {
+						$src=$fw->read($save);
 						for ($ptr=0,$len=strlen($src);$ptr<$len;) {
 							if ($src[$ptr]=='/') {
 								if (substr($src,$ptr+1,2)=='*@') {
@@ -404,9 +408,9 @@ class Web extends Prefab {
 									$ofs=$ptr;
 									while ($ofs) {
 										$ofs--;
-										// Pattern should be preceded by open
-										// parenthesis,colon (object property)
-										// or operator
+										// Pattern should be preceded by
+										// open parenthesis, colon,
+										// object property or operator
 										if (preg_match(
 											'/(return|[(:=!+\-*&|])$/',
 											substr($src,0,$ofs+1))) {
@@ -466,11 +470,10 @@ class Web extends Prefab {
 							}
 							$dst.=$src[$ptr];
 							$ptr++;
+							if ($fw->get('CACHE'))
+								$cache->set($hash,$dst);
 						}
-						$fw->write($save,$dst);
 					}
-					else
-						$dst=$fw->read($save);
 				}
 		if (PHP_SAPI!='cli')
 			header('Content-Type: '.$mime.'; charset='.$fw->get('ENCODING'));
