@@ -113,7 +113,7 @@ final class Base {
 	**/
 	private function cut($key) {
 		return preg_split('/\[\s*[\'"]?(.+?)[\'"]?\s*\]|(->)|\./',
-			$key,NULL,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
+			$key,NULL,PREG_SPLIT_NO_EMPTY);
 	}
 
 	/**
@@ -428,9 +428,14 @@ final class Base {
 				return addslashes(get_class($arg)).'::__set_state('.$str.')';
 			case 'array':
 				$str='';
-				foreach ($arg as $key=>$val)
-					$str.=($str?',':'').
-						$this->stringify($key).'=>'.$this->stringify($val);
+				if ($arg) {
+					$num=isset($arg[0]) &&
+						ctype_digit(implode('',array_keys($arg)));
+					foreach ($arg as $key=>$val)
+						$str.=($str?',':'').
+							($num?'':($this->stringify($key).'=>')).
+							$this->stringify($val);
+				}
 				return 'array('.$str.')';
 			default:
 				return var_export(
@@ -793,8 +798,11 @@ final class Base {
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
 				$addr=$this->fixslashes($frame['file']).':'.$frame['line'];
-				if (isset($frame['class']))
+				if (isset($frame['class'])) {
+					if ($frame['class']=='Closure')
+						$frame['class']='{closure}';
 					$line.=$frame['class'].$frame['type'];
+				}
 				if (isset($frame['function'])) {
 					$line.=$frame['function'];
 					if (!preg_match('/{.+}/',$frame['function'])) {
@@ -1436,8 +1444,7 @@ final class Base {
 			'VERSION'=>self::VERSION
 		);
 		if (PHP_SAPI=='cli-server' &&
-			!strlen(preg_replace('/^'.preg_quote($base,'/').'\b(.*)/','\1',
-				$this->hive['URI'])))
+			preg_match('/^'.preg_quote($base,'/').'$/',$this->hive['URI']))
 			$this->reroute('/');
 		if (ini_get('auto_globals_jit'))
 			// Override setting
