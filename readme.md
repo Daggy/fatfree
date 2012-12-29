@@ -185,6 +185,16 @@ An important point to consider: You will get Fat-Free (and yourself) confused if
 
 Wait a second - in all the previous examples, we never really created any directory in our hard drive to store these routes. The short answer: we don't have to. All F3 routes are virtual. They don't mirror our hard disk folder structure. If you have programs or static files (images, CSS, etc.) that do not use the framework - as long as the paths to these files do not conflict with any route defined in your application - your Web server software will deliver them to the user's browser, provided the server is configured properly.
 
+### PHP 5.4's Built-In Web Server
+
+F3 works seamlessly with PHP's latest stable version has its own Web server. Start it up using the following configuration:-
+
+``` bash
+php -S localhost:80 -t /var/www/
+```
+
+The above command will start routing all requests to the Web root `/var/www`. If an imcoming HTTP request for a file or folder is received, PHP will look for it inside the Web root and send it over to the browser if found. Otherwise, PHP will load the default `index.php` (containing your F3-enabled code).
+
 ### Sample Apache Configuration
 
 If you're using Apache, make sure you activate the URL rewriting module (mod_rewrite) in your apache.conf (or httpd.conf) file. You should also create a .htaccess file containing the following:-
@@ -1041,8 +1051,8 @@ Dictionaries are nothing more than key-value pairs. F3 automatically instantiate
 ``` html
 <h1>{{ @love }}</h1>
 <p>
-{{ @today | time() | format }}.<br />
-{{ @money | 365.25 | format }}<br />
+{{ @today,time() | format }}.<br />
+{{ @money,365.25 | format }}<br />
 {{ @pi }}
 </p>
 ```
@@ -2138,9 +2148,9 @@ Once you get the hang of testing the smallest units of your application, you can
 * Render escaped `expr`. This is the default framework behavior. The `| esc` suffix is only necessary if `ESCAPE` global variable is set to `FALSE`.
 
 ```
-{{ string expr | args | format }}
+{{ string expr, arg1, ..., argN | format }}
 ```
-* Render an ICU-formatted `expr` and pass the comma-separated `args`.
+* Render an ICU-formatted `expr` and pass the comma-separated arguments.
 
 ```
 <include
