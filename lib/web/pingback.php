@@ -62,6 +62,8 @@ class Pingback extends \Prefab {
 			$parts['host']==$fw->get('HOST')) {
 			$req=$web->request($source);
 			$doc=new \DOMDocument('1.0',$fw->get('ENCODING'));
+			$doc->stricterrorchecking=FALSE;
+			$doc->recover=TRUE;
 			if ($req && $doc->loadhtml($req['body'])) {
 				// Parse anchor tags
 				$links=$doc->getelementsbytagname('a');
