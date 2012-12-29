@@ -798,10 +798,8 @@ final class Base {
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
 				$addr=$this->fixslashes($frame['file']).':'.$frame['line'];
-				var_dump($frame);
-				if (isset($frame['class'])) {
+				if (isset($frame['class']))
 					$line.=$frame['class'].$frame['type'];
-				}
 				if (isset($frame['function'])) {
 					$line.=$frame['function'];
 					if (!preg_match('/{.+}/',$frame['function'])) {
@@ -825,7 +823,8 @@ final class Base {
 		if ($this->hive['ONERROR'])
 			// Execute custom error handler
 			$this->call($this->hive['ONERROR'],array($this));
-		elseif (!$prior && PHP_SAPI!='cli' && !$this->hive['QUIET'])
+		elseif (!$prior && PHP_SAPI!='cli' && !$this->hive['QUIET']) {
+			header('Connection: close');
 			echo
 				'<!DOCTYPE html>'.
 				'<html>'.$eol.
@@ -841,6 +840,7 @@ final class Base {
 						('<p>'.$eol.nl2br($out).'</p>'.$eol):'').
 				'</body>'.$eol.
 				'</html>';
+		}
 	}
 
 	/**
