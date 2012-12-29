@@ -943,7 +943,7 @@ final class Base {
 		krsort($this->hive['ROUTES']);
 		// Convert to BASE-relative URL
 		$req=preg_replace(
-			'/^'.preg_quote($this->hive['BASE'],'/').'\b(.+)/','\1',
+			'/^'.preg_quote($this->hive['BASE'],'/').'\b(.*)/','\1',
 			$this->hive['URI']
 		);
 		$allowed=array();
@@ -1367,6 +1367,10 @@ final class Base {
 		$base=implode('/',array_map('urlencode',
 			explode('/',$this->fixslashes(
 			preg_replace('/\/[^\/]+$/','',$_SERVER['SCRIPT_NAME'])))));
+		if (PHP_SAPI=='cli-server' &&
+			!strlen(preg_replace('/^'.preg_quote($base,'/').'\b(.*)/','\1',
+			$_SERVER['REQUEST_URI'])))
+			$this->reroute($_SERVER['REQUEST_URI'].'/');
 		call_user_func_array('session_set_cookie_params',
 			$jar=array(
 				'expire'=>0,
