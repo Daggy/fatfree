@@ -40,7 +40,7 @@ class Internals extends Controller {
 		);
 		$test->expect(
 			$f3->stringify(array(1,'a',0.5))==
-				'array(0=>1,1=>\'a\',2=>0.5)' &&
+				'array(1,\'a\',0.5)' &&
 			$f3->stringify(array('x'=>'hello','y'=>'world'))==
 				'array(\'x\'=>\'hello\',\'y\'=>\'world\')',
 			'Convert array to exportable string'

@@ -113,7 +113,7 @@ final class Base {
 	**/
 	private function cut($key) {
 		return preg_split('/\[\s*[\'"]?(.+?)[\'"]?\s*\]|(->)|\./',
-			$key,NULL,PREG_SPLIT_NO_EMPTY);
+			$key,NULL,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
 	}
 
 	/**
@@ -798,9 +798,8 @@ final class Base {
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
 				$addr=$this->fixslashes($frame['file']).':'.$frame['line'];
+				var_dump($frame);
 				if (isset($frame['class'])) {
-					if ($frame['class']=='Closure')
-						$frame['class']='{closure}';
 					$line.=$frame['class'].$frame['type'];
 				}
 				if (isset($frame['function'])) {
