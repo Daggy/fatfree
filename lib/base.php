@@ -1315,7 +1315,7 @@ final class Base {
 			$this->error(500,sprintf(self::E_Fatal,$error['message']),
 				array($error));
 		if (isset($this->hive['UNLOAD']))
-			$this->UNLOAD();
+			$this->hive['UNLOAD']($this);
 	}
 
 	/**
