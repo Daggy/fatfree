@@ -144,7 +144,7 @@ final class Base {
 					if (!is_object($var))
 						$var=new stdclass;
 					if (isset($var->$part))
-						$var->$part=NULL;
+						$var->$part=$this->null;
 					$var=&$var->$part;
 					$obj=FALSE;
 				}
