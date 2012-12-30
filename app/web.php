@@ -60,16 +60,20 @@ class Web extends Controller {
 				\View::instance()->render('js/underscore.min.js'),
 			'Minify Javascript ('.round(1e3*(microtime(TRUE)-$now),1).' msecs)'
 		);
+		$now=microtime(TRUE);
 		$test->expect(
-			$req=$web->request($url='www.google.com/'),
-			'HTTP request ('.$url.') using '.$req['engine']
+			$req=$web->request($url='http://www.google.com/'),
+			'HTTP request ('.$url.') using '.$req['engine'].' '.
+			'('.round(1e3*(microtime(TRUE)-$now),1).' msecs)'
+		);
+		$now=microtime(TRUE);
+		$test->expect(
+			$web->request('pingback2?page=client'),
+			'HTTP request (local resource: '.
+			round(1e3*(microtime(TRUE)-$now),1).' msecs)'
 		);
 		$test->expect(
-			$web->request('pingback2?page=pingback'),
-			'HTTP request (local resource)'
-		);
-		$test->expect(
-			is_array($web->rss(
+			is_array($rss=$web->rss(
 				$url='https://news.google.com/news/feeds?output=rss')),
 			'RSS/Atom feed ('.$url.')'
 		);
