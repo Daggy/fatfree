@@ -108,10 +108,9 @@ class Mapper extends \DB\Cursor {
 		);
 		if ($options['group']) {
 			$fw=\Base::instance();
-			$this->db->selectcollection(
-				$tmp=$fw->get('HOST').'.'.$fw->get('BASE').'.'.
-					uniqid().'.tmp');
-			$this->db->$tmp->batchinsert(
+			$tmp=$this->db->selectcollection(
+				$fw->get('HOST').'.'.$fw->get('BASE').'.'.uniqid().'.tmp');
+			$tmp->batchinsert(
 				$this->collection->group(
 					$options['group']['keys'],
 					$options['group']['initial'],
@@ -126,7 +125,7 @@ class Mapper extends \DB\Cursor {
 				array('safe'=>TRUE)
 			);
 			$filter=array();
-			$collection=$this->db->$tmp;
+			$collection=$tmp;
 		}
 		else {
 			$filter=$filter?:array();
@@ -140,7 +139,7 @@ class Mapper extends \DB\Cursor {
 		if ($options['offset'])
 			$cursor=$cursor->skip($options['offset']);
 		if ($options['group'])
-			$this->db->$tmp->drop();
+			$tmp->drop();
 		$result=iterator_to_array($cursor,FALSE);
 		$out=array();
 		foreach ($result as &$doc) {
