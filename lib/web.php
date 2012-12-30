@@ -187,7 +187,7 @@ class Web extends Prefab {
 			// Local URL
 			$url=$fw->get('SCHEME').'://'.
 				$fw->get('HOST').
-				($url[0]!='/'?($fw->get('BASE')?:'/'):'').$url;
+				($url[0]!='/'?($fw->get('BASE').'/'):'').$url;
 			$parts=parse_url($url);
 		}
 		elseif (!preg_match('/https?/',$parts['scheme']))
@@ -300,17 +300,11 @@ class Web extends Prefab {
 					($parts['query']?('?'.$parts['query']):'').' '.
 					'HTTP/1.1'.$eol
 				);
-				fputs($socket,
-					'Content-Length: '.strlen($parts['query']).$eol.
-					'Accept-Encoding: gzip'.$eol
-				);
 				if (isset($options['header']))
 					fputs($socket,implode($eol,$options['header']).$eol);
-				if (isset($options['user_agent']))
-					fputs($socket,'User-Agent: '.$options['user_agent'].$eol);
 				fputs($socket,$eol);
 				if (isset($options['content']))
-					fputs($socket,$options['content'].$eol.$eol);
+					fputs($socket,$options['content'].$eol);
 				// Get response
 				$content='';
 				while (!feof($socket) &&
@@ -320,7 +314,7 @@ class Web extends Prefab {
 				fclose($socket);
 				$html=explode($eol.$eol,$content);
 				$headers=array_merge($headers,explode($eol,$html[0]));
-				$body=$html[1];
+				$body=isset($html[1])?$html[1]:'';
 				if (preg_match('/Content-Encoding:\s.*?gzip.*?'.
 					preg_quote($eol).'/',$html[0]))
 					$body=gzinflate(substr($body,10));
