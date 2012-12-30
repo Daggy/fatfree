@@ -1018,8 +1018,8 @@ final class Base {
 					else {
 						// Expire HTTP client-cached page
 						$this->expire($ttl);
-						// Call route handler
 						ob_start();
+						// Call route handler
 						$this->call($handler,array($this,$args),
 							'beforeroute,afterroute');
 						$body=ob_get_clean();
@@ -1031,8 +1031,8 @@ final class Base {
 				}
 				else {
 					$this->expire(0);
-					// Call route handler
 					ob_start();
+					// Call route handler
 					$this->call($handler,array($this,$args),
 						'beforeroute,afterroute');
 					$body=ob_get_clean();
@@ -1804,6 +1804,7 @@ class ISO extends Prefab {
 		CC_bm='Bermuda',
 		CC_bt='Bhutan',
 		CC_bo='Bolivia',
+		CC_bq='Bonaire, Sint Eustatius and Saba',
 		CC_ba='Bosnia and Herzegovina',
 		CC_bw='Botswana',
 		CC_bv='Bouvet Island',
@@ -1830,7 +1831,7 @@ class ISO extends Prefab {
 		CC_cd='Congo, The Democratic Republic of',
 		CC_ck='Cook Islands',
 		CC_cr='Costa Rica',
-		CC_ci='Côte D\'ivoire',
+		CC_ci='Côte d\'ivoire',
 		CC_hr='Croatia',
 		CC_cu='Cuba',
 		CC_cw='Curaçao',
@@ -1872,7 +1873,7 @@ class ISO extends Prefab {
 		CC_gw='Guinea-Bissau',
 		CC_gy='Guyana',
 		CC_ht='Haiti',
-		CC_hm='Heard Island and Mcdonald Islands',
+		CC_hm='Heard Island and McDonald Islands',
 		CC_va='Holy See (Vatican City State)',
 		CC_hn='Honduras',
 		CC_hk='Hong Kong',
@@ -1883,12 +1884,12 @@ class ISO extends Prefab {
 		CC_ir='Iran, Islamic Republic of',
 		CC_iq='Iraq',
 		CC_ie='Ireland',
-		CC_im='Isle of Man ',
+		CC_im='Isle of Man',
 		CC_il='Israel',
 		CC_it='Italy',
 		CC_jm='Jamaica',
 		CC_jp='Japan',
-		CC_je='Jersey ',
+		CC_je='Jersey',
 		CC_jo='Jordan',
 		CC_kz='Kazakhstan',
 		CC_ke='Kenya',
@@ -1902,7 +1903,7 @@ class ISO extends Prefab {
 		CC_lb='Lebanon',
 		CC_ls='Lesotho',
 		CC_lr='Liberia',
-		CC_ly='Libyan Arab Jamahiriya',
+		CC_ly='Libya',
 		CC_li='Liechtenstein',
 		CC_lt='Lithuania',
 		CC_lu='Luxembourg',
@@ -1924,6 +1925,7 @@ class ISO extends Prefab {
 		CC_md='Moldova, Republic of',
 		CC_mc='Monaco',
 		CC_mn='Mongolia',
+		CC_me='Montenegro',
 		CC_ms='Montserrat',
 		CC_ma='Morocco',
 		CC_mz='Mozambique',
@@ -1932,7 +1934,6 @@ class ISO extends Prefab {
 		CC_nr='Nauru',
 		CC_np='Nepal',
 		CC_nl='Netherlands',
-		CC_an='Netherlands Antilles',
 		CC_nc='New Caledonia',
 		CC_nz='New Zealand',
 		CC_ni='Nicaragua',
@@ -1960,9 +1961,11 @@ class ISO extends Prefab {
 		CC_ro='Romania',
 		CC_ru='Russian Federation',
 		CC_rw='Rwanda',
-		CC_sh='Saint Helena',
+		CC_bl='Saint Barthélemy',
+		CC_sh='Saint Helena, Ascension and Tristan da Cunha',
 		CC_kn='Saint Kitts and Nevis',
 		CC_lc='Saint Lucia',
+		CC_mf='Saint Martin (French Part)',
 		CC_pm='Saint Pierre and Miquelon',
 		CC_vc='Saint Vincent and The Grenadines',
 		CC_ws='Samoa',
@@ -1970,16 +1973,18 @@ class ISO extends Prefab {
 		CC_st='Sao Tome and Principe',
 		CC_sa='Saudi Arabia',
 		CC_sn='Senegal',
-		CC_cs='Serbia and Montenegro',
+		CC_rs='Serbia',
 		CC_sc='Seychelles',
 		CC_sl='Sierra Leone',
 		CC_sg='Singapore',
 		CC_sk='Slovakia',
+		CC_sx='Sint Maarten (Dutch Part)',
 		CC_si='Slovenia',
 		CC_sb='Solomon Islands',
 		CC_so='Somalia',
 		CC_za='South Africa',
 		CC_gs='South Georgia and The South Sandwich Islands',
+		CC_ss='South Sudan',
 		CC_es='Spain',
 		CC_lk='Sri Lanka',
 		CC_sd='Sudan',
