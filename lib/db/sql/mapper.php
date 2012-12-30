@@ -294,6 +294,7 @@ class Mapper extends \DB\Cursor {
 				'INSERT INTO '.$this->table.' ('.$fields.') '.
 				'VALUES ('.$values.');',$args
 			);
+		$pkeys=array();
 		$out=array();
 		$inc=array();
 		foreach ($this->fields as $key=>$field) {
@@ -306,18 +307,16 @@ class Mapper extends \DB\Cursor {
 					$inc[]=$key;
 			}
 		}
-		parent::reset();
-		$this->_id=NULL;
+		$seq=NULL;
+		if ($this->engine=='pgsql')
+			$seq=$this->table.'_'.end($pkeys).'_seq';
+		$this->_id=$this->db->lastinsertid($seq);
 		$ctr=count($inc);
 		if ($ctr!=1)
 			return $out;
 		// Reload to obtain default and auto-increment field values
-		$seq=NULL;
-		if ($this->engine=='pgsql')
-			$seq=$this->table.'_'.end($pkeys).'_seq';
 		return $this->load(array($inc[0].'=?',
-			$this->value($this->fields[$inc[0]]['pdo_type'],
-				$this->_id=$this->db->lastinsertid($seq))));
+			$this->value($this->fields[$inc[0]]['pdo_type'],$this->_id)));
 	}
 
 	/**
