@@ -94,6 +94,10 @@ class Mongo extends Controller {
 				);
 				$movie->prev();
 				$test->expect(
+					!$movie->dry(),
+					'Hydrated'
+				);
+				$test->expect(
 					$movie->get('title')=='Donnie Brasco' &&
 					$movie->get('director')=='Mike Newell' &&
 					$movie->get('year')==1997,
@@ -144,7 +148,7 @@ class Mongo extends Controller {
 					'Hydrate mapper from hive key'
 				);
 				$test->expect(
-					!$movie->next(),
+					!$movie->next() && $movie->dry(),
 					'Navigation beyond cursor limit'
 				);
 				$obj=$movie->findone(array('title'=>'Zodiac'));
