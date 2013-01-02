@@ -116,7 +116,7 @@ class SMTP extends Magic {
 		while (!feof($socket) && ($info=stream_get_meta_data($socket)) &&
 			!$info['timed_out'] && $str=fgets($socket,4096)) {
 			$reply.=$str;
-			if (preg_match('/(?:^|\n)\d{3}\s.+?\r\n/s',$reply))
+			if (preg_match('/(?:^|\n)\d{3} .+?\r\n/s',$reply))
 				break;
 		}
 		if ($log) {

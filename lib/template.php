@@ -198,7 +198,7 @@ class Template extends View {
 				'/{{(.+?)}}/s',
 				function($expr) use($self) {
 					$str=trim($self->token($expr[1]));
-					if (preg_match('/^(.+?)\s*\|\s*(raw|esc|format)$/',
+					if (preg_match('/^(.+?) *\| *(raw|esc|format)$/',
 						$str,$parts))
 						$str='Base::instance()->'.$parts[2].'('.$parts[1].')';
 					return '<?php echo '.$str.'; ?>';
@@ -259,7 +259,7 @@ class Template extends View {
 					for ($ptr=0,$len=strlen($text),$tree=array(),$node=&$tree,
 						$stack=array(),$depth=0,$temp='';$ptr<$len;)
 						if (preg_match('/^<(\/?)(?:F3:)?('.$this->tags.')\b'.
-							'((?:\s+\w+s*=\s*(?:"(?:.+?)"|\'(?:.+?)\'))*)\s*'.
+							'((?: +\w+s*= *(?:"(?:.+?)"|\'(?:.+?)\'))*) *'.
 							'(\/?)>/is',substr($text,$ptr),$match)) {
 							if (strlen($temp))
 								$node[]=$temp;
@@ -290,8 +290,8 @@ class Template extends View {
 								if ($match[3]) {
 									// Process attributes
 									preg_match_all(
-										'/\s+(\w+)\s*='.
-										'\s*(?:"(.+?)"|\'(.+?)\')/s',
+										'/\b(\w+) *= *'.
+										'(?:"(.+?)"|\'(.+?)\')/s',
 										$match[3],$attr,PREG_SET_ORDER);
 									foreach ($attr as $kv)
 										$node['@attrib'][$kv[1]]=
