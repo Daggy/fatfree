@@ -257,12 +257,12 @@ class Template extends View {
 						$fw->read($view));
 					// Build tree structure
 					for ($ptr=0,$len=strlen($text),$tree=array(),$node=&$tree,
-						$stack=array(),$depth=0,$temp='';$ptr<$len;)
+						$stack=array(),$depth=0,$tmp='';$ptr<$len;)
 						if (preg_match('/^<(\/?)(?:F3:)?('.$this->tags.')\b'.
 							'((?:\h+\w+\h*=\h*(?:"(?:.+?)"|\'(?:.+?)\'))*)'.
 							'\h*(\/?)>/is',substr($text,$ptr),$match)) {
-							if (strlen($temp))
-								$node[]=$temp;
+							if (strlen($tmp))
+								$node[]=$tmp;
 							// Element node
 							if ($match[1]) {
 								// Find matching start tag
@@ -303,17 +303,17 @@ class Template extends View {
 								else
 									$depth++;
 							}
-							$temp='';
+							$tmp='';
 							$ptr+=strlen($match[0]);
 						}
 						else {
 							// Text node
-							$temp.=$text[$ptr];
+							$tmp.=$text[$ptr];
 							$ptr++;
 						}
-					if (strlen($temp))
+					if (strlen($tmp))
 						// Append trailing text
-						$node[]=$temp;
+						$node[]=$tmp;
 					// Break references
 					unset($node);
 					unset($stack);
