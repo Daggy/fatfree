@@ -794,24 +794,18 @@ final class Base {
 		// Analyze stack trace
 		foreach ($trace as $frame) {
 			$line='';
-			if (isset($frame['file']) && ($frame['file']!=__FILE__ ||
-				$this->hive['DEBUG']>1) && (empty($frame['class']) ||
-				$frame['class']!='Magic') && (empty($frame['function']) ||
+			if (isset($frame['file']) &&
+				($frame['file']!=__FILE__ || $this->hive['DEBUG']>1) &&
+				(empty($frame['function']) ||
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
 				$line=$this->fixslashes($frame['file']).':'.
 					$frame['line'].' ';
 				if (isset($frame['class']))
 					$line.=$frame['class'].$frame['type'];
-				if (isset($frame['function'])) {
-					$line.=$frame['function'];
-					if (!preg_match('/{.+}/',$frame['function'])) {
-						$line.='(';
-						if (!empty($frame['args']))
-							$line.=$this->csv($frame['args']);
-						$line.=')';
-					}
-				}
+				if (isset($frame['function']))
+					$line.=$frame['function'].
+						'('.$this->csv($frame['args']).')';
 				error_log('- '.$line);
 				$out.='&bull; '.($css?$this->highlight($line):$line).$eol;
 			}
@@ -1085,13 +1079,13 @@ final class Base {
 		if (!is_callable($func) && $hooks=='beforeroute,afterroute')
 			// No route handler
 			$this->error(404);
-		$oo=FALSE;
+		$obj=FALSE;
 		if (is_array($func)) {
 			$hooks=$this->split($hooks);
-			$oo=TRUE;
+			$obj=TRUE;
 		}
 		// Execute pre-route hook if any
-		if ($oo && $hooks && in_array($hook='beforeroute',$hooks) &&
+		if ($obj && $hooks && in_array($hook='beforeroute',$hooks) &&
 			method_exists($func[0],$hook) &&
 			call_user_func_array(array($func[0],$hook),$args)===FALSE)
 			return FALSE;
@@ -1100,7 +1094,7 @@ final class Base {
 		if ($out===FALSE)
 			return FALSE;
 		// Execute post-route hook if any
-		if ($oo && $hooks && in_array($hook='afterroute',$hooks) &&
+		if ($obj && $hooks && in_array($hook='afterroute',$hooks) &&
 			method_exists($func[0],$hook) &&
 			call_user_func_array(array($func[0],$hook),$args)===FALSE)
 			return FALSE;
