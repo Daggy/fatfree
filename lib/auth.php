@@ -125,7 +125,7 @@ class Auth extends Prefab {
 							($info=stream_get_meta_data($socket)) &&
 							!$info['timed_out'] && $str=fgets($socket,4096)) {
 							$reply.=$str;
-							if (preg_match('/(?:^|\n)\d{3}\s.+\r\n/s',
+							if (preg_match('/(?:^|\n)\d{3} .+\r\n/s',
 								$reply))
 								break;
 						}
@@ -148,7 +148,7 @@ class Auth extends Prefab {
 						$reply=$dialog(base64_encode($pw));
 						$dialog('QUIT');
 						fclose($socket);
-						return (bool)preg_match('/^235\s/',$reply);
+						return (bool)preg_match('/^235 /',$reply);
 					}
 					user_error(self::E_SMTP);
 			}
