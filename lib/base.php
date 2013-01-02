@@ -1029,18 +1029,22 @@ final class Base {
 					// Save to cache backend
 					$cache->set($hash,
 						array(headers_list(),$body),$ttl);
-				if ($this->hive['RESPONSE']=$body) {
-					$ctr=0;
-					foreach (str_split($body,1024) as $part) {
-						if ($kbps) {
+				$this->hive['RESPONSE']=$body;
+				if (!$this->hive['QUIET']) {
+					if ($kbps) {
+						$ctr=0;
+						foreach (str_split($body,1024) as $part) {
 							// Throttle output
 							$ctr++;
 							if ($ctr/$kbps>$elapsed=microtime(TRUE)-$now)
 								usleep(1e6*($ctr/$kbps-$elapsed));
+							set_time_limit(ini_get('max_execution_time'));
+							if (!$this->hive['QUIET'])
+								echo $part;
 						}
-						if (!$this->hive['QUIET'])
-							echo $part;
 					}
+					else
+						echo $body;
 				}
 				return;
 			}
