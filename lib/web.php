@@ -192,29 +192,40 @@ class Web extends Prefab {
 		}
 		elseif (!preg_match('/https?/',$parts['scheme']))
 			return FALSE;
-		if (isset($options['header']) && is_string($options['header']))
+		if (empty($options['header']))
+			$options['header']=array();
+		elseif (is_string($options['header']))
 			$options['header']=array($options['header']);
+		if (isset($options['content']))
+			$options['header']=array_merge(
+				$options['header'],
+				array(
+					'Content-Type: application/x-www-form-urlencoded',
+					'Content-Length: '.strlen($options['content'])
+				)
+			);
+		$options['header']=array_merge(
+			$options['header'],
+			array(
+				'Host: '.$parts['host'],
+				'User-Agent: Mozilla/5.0 '.'(compatible; '.php_uname('s').')',
+				'Connection: close'
+			)
+		);
 		$options+=array(
 			'method'=>'GET',
-			'header'=>array(
-				'Host: '.$parts['host'],
-				'User-Agent: Mozilla/5.0 (compatible; '.php_uname('s').')',
-				'Connection: close',
-			),
+			'header'=>$options['header'],
 			'follow_location'=>TRUE,
 			'max_redirects'=>20,
 			'ignore_errors'=>TRUE
 		);
-		if ($options['method']!='GET')
-			$options['header']+=
-				array('Content-Type: application/x-www-form-urlencoded');
 		$eol="\r\n";
 		if ($fw->get('CACHE') &&
 			preg_match('/GET|HEAD/',$options['method'])) {
 			$cache=Cache::instance();
 			if ($cache->exists(
 				$hash=$fw->hash($options['method'].' '.$url).'.url',$data)) {
-				if (preg_match('/Last-Modified:\s(.+?)'.preg_quote($eol).'/',
+				if (preg_match('/Last-Modified: (.+?)'.preg_quote($eol).'/',
 					implode($eol,$data['headers']),$mod))
 					$options['header']+=array('If-Modified-Since: '.$mod[1]);
 			}
@@ -281,12 +292,11 @@ class Web extends Prefab {
 						'Authorization: Basic '.
 							base64_encode($parts['user'].':'.$parts['pass'])
 					);
-				if (isset($parts['scheme']) && $parts['scheme']=='https') {
+				if ($parts['scheme']=='https') {
 					$parts['host']='ssl://'.$parts['host'];
-					if (empty($parts['port']))
-						$parts['port']=443;
+					$parts['port']=443;
 				}
-				elseif (empty($parts['port']))
+				else
 					$parts['port']=80;
 				if (empty($parts['path']))
 					$parts['path']='/';
@@ -295,14 +305,12 @@ class Web extends Prefab {
 				$socket=@fsockopen($parts['host'],$parts['port'],$code,$text);
 				if (!$socket)
 					return FALSE;
-				stream_set_blocking($socket,1);
+				stream_set_blocking($socket,TRUE);
 				fputs($socket,$options['method'].' '.$parts['path'].
 					($parts['query']?('?'.$parts['query']):'').' '.
 					'HTTP/1.1'.$eol
 				);
-				if (isset($options['header']))
-					fputs($socket,implode($eol,$options['header']).$eol);
-				fputs($socket,$eol);
+				fputs($socket,implode($eol,$options['header']).$eol.$eol);
 				if (isset($options['content']))
 					fputs($socket,$options['content'].$eol);
 				// Get response
@@ -315,11 +323,8 @@ class Web extends Prefab {
 				$html=explode($eol.$eol,$content);
 				$headers=array_merge($headers,explode($eol,$html[0]));
 				$body=isset($html[1])?$html[1]:'';
-				if (preg_match('/Content-Encoding:\s.*?gzip.*?'.
-					preg_quote($eol).'/',$html[0]))
-					$body=gzinflate(substr($body,10));
 				if (!$options['follow_location'] ||
-					!preg_match('/Location:\s(.+?)'.preg_quote($eol).'/',
+					!preg_match('/Location: (.+?)'.preg_quote($eol).'/',
 					$html[0],$loc))
 					break;
 				$url=$loc[1];
@@ -338,7 +343,7 @@ class Web extends Prefab {
 				$result=$cache->get($hash);
 				$result['cached']=TRUE;
 			}
-			elseif (preg_match('/Cache-Control:\smax-age=(.+?)'.
+			elseif (preg_match('/Cache-Control: max-age=(.+?)'.
 				preg_quote($eol).'/',implode($eol,$result['headers']),$exp))
 				$cache->set($hash,$result,$exp[1]);
 		}
