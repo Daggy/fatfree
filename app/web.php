@@ -68,7 +68,7 @@ class Web extends Controller {
 		);
 		$now=microtime(TRUE);
 		$test->expect(
-			$web->request('pingback2?page=client'),
+			$web->request('pingback2?page=pingback/client'),
 			'HTTP request (local resource: '.
 			round(1e3*(microtime(TRUE)-$now),1).' msecs)'
 		);
