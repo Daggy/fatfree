@@ -832,7 +832,7 @@ final class Base {
 					'<p>'.
 						$this->encode($text?:$req).'</p>'.$eol.
 					($out && $this->hive['DEBUG']?
-						('<p>'.$eol.nl2br($out).'</p>'.$eol):'').
+						('<pre>'.$eol.$out.'</pre>'.$eol):'').
 				'</body>'.$eol.
 				'</html>';
 		}
