@@ -797,7 +797,8 @@ final class Base {
 				$frame['class']!='Magic') && (empty($frame['function']) ||
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
-				$addr=$this->fixslashes($frame['file']).':'.$frame['line'];
+				$line=$this->fixslashes($frame['file']).':'.
+					$frame['line'].' ';
 				if (isset($frame['class']))
 					$line.=$frame['class'].$frame['type'];
 				if (isset($frame['function'])) {
@@ -809,10 +810,8 @@ final class Base {
 						$line.=')';
 					}
 				}
-				error_log('- '.$addr.' '.$line);
-				$out.='&bull; '.
-					($css?$this->highlight($addr):$addr).' '.
-					($css?$this->highlight($line):$line).$eol;
+				error_log('- '.$line);
+				$out.='&bull; '.($css?$this->highlight($line):$line).$eol;
 			}
 		}
 		$this->hive['ERROR']=array(
