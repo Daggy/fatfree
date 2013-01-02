@@ -100,6 +100,7 @@ class Web extends Prefab {
 				$ctr++;
 				if ($ctr/$kbps>$elapsed=microtime(TRUE)-$start)
 					usleep(1e6*($ctr/$kbps-$elapsed));
+				set_time_limit(ini_get('max_execution_time'));
 			}
 			// Send 1KiB and reset timer
 			echo fread($handle,1024);
