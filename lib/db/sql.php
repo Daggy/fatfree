@@ -137,7 +137,7 @@ class SQL extends \PDO {
 					user_error('PDOStatement: '.$error[2]);
 				}
 				if (preg_match(
-					'/^\s*(?:CALL|EXPLAIN|SELECT|PRAGMA|SHOW)\s/i',$cmd)) {
+					'/\b(?:CALL|EXPLAIN|SELECT|PRAGMA|SHOW)\b/i',$cmd)) {
 					$result=$query->fetchall(\PDO::FETCH_ASSOC);
 					$this->rows=count($result);
 					if ($fw->get('CACHE') && $ttl)
