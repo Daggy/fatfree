@@ -135,7 +135,7 @@ class OpenID extends \Magic {
 		$fw=\Base::instance();
 		$root=$fw->get('SCHEME').'://'.$fw->get('HOST');
 		if (empty($this->args['trust_root']))
-			$this->args['trust_root']=$root.($fw->get('BASE')?:'/');
+			$this->args['trust_root']=$root.$fw->get('BASE').'/';
 		if (empty($this->args['return_to']))
 			$this->args['return_to']=$root.$_SERVER['REQUEST_URI'];
 		$this->args['mode']='checkid_setup';
