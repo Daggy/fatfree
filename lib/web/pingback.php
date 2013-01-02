@@ -74,7 +74,7 @@ class Pingback extends \Prefab {
 						$req=$web->request($found,
 							array(
 								'method'=>'POST',
-								'header'=>'Content-Type: text/xml',
+								'header'=>'Content-Type: application/xml',
 								'content'=>xmlrpc_encode_request(
 									'pingback.ping',
 									array($source,$permalink),
@@ -101,6 +101,8 @@ class Pingback extends \Prefab {
 	**/
 	function listen($func,$path=NULL) {
 		$fw=\Base::instance();
+		header('X-Powered-By: '.$fw->get('PACKAGE'));
+		header('Content-Type: text/html; charset='.$fw->get('ENCODING'));
 		if (!$path)
 			$path=$fw->get('BASE');
 		$web=\Web::instance();
