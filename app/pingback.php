@@ -27,11 +27,11 @@ class Pingback extends Controller {
 			'Transaction log available'
 		);
 		$test->expect(
-			$f3->read($file)==
+			@file_get_contents($file)==
 				\View::instance()->render('pingback/client.htm'),
 			'Read source contents'
 		);
-		$f3->unlink($file);
+		@unlink($file);
 		$pingback->inspect('http://example.com/');
 		$test->expect(
 			!is_file($file),
