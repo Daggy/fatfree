@@ -64,7 +64,7 @@ class Pingback extends \Prefab {
 			$doc=new \DOMDocument('1.0',$fw->get('ENCODING'));
 			$doc->stricterrorchecking=FALSE;
 			$doc->recover=TRUE;
-			if ($req && $doc->loadhtml($req['body'])) {
+			if ($req && @$doc->loadhtml($req['body'])) {
 				// Parse anchor tags
 				$links=$doc->getelementsbytagname('a');
 				foreach ($links as $link) {
