@@ -112,7 +112,7 @@ final class Base {
 		@param $key string
 	**/
 	private function cut($key) {
-		return preg_split('/\[\s*[\'"]?(.+?)[\'"]?\s*\]|(->)|\./',
+		return preg_split('/\[ *[\'"]?(.+?)[\'"]? *\]|(->)|\./',
 			$key,NULL,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
 	}
 
@@ -883,7 +883,7 @@ final class Base {
 		@param $kbps int
 	**/
 	function route($pattern,$handler,$ttl=0,$kbps=0) {
-		$parts=preg_split('/\s+/',$pattern,2,PREG_SPLIT_NO_EMPTY);
+		$parts=preg_split('/ +/',$pattern,2,PREG_SPLIT_NO_EMPTY);
 		if (count($parts)<2)
 			user_error(sprintf(self::E_Pattern,$pattern));
 		list($verbs,$url)=$parts;
@@ -1076,7 +1076,7 @@ final class Base {
 	function call($func,array $args=NULL,$hooks='') {
 		// Execute function; abort if callback/hook returns FALSE
 		if (is_string($func) &&
-			preg_match('/(.+)\s*(->|::)\s*(.+)/s',$func,$parts)) {
+			preg_match('/(.+) *(->|::) *(.+)/s',$func,$parts)) {
 			// Convert string to executable PHP callback
 			if (!class_exists($parts[1]))
 				$this->error(404);
