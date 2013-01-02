@@ -34,15 +34,15 @@ class Pingback extends \Prefab {
 		if ($req && $req['body']) {
 			// Look for pingback header
 			foreach ($req['headers'] as $header)
-				if (preg_match('/^X-Pingback: *(.+)/',$header,$href)) {
+				if (preg_match('/^X-Pingback:\h*(.+)/',$header,$href)) {
 					$found=$href[1];
 					break;
 				}
 			if (!$found &&
 				// Scan page for pingback link tag
-				preg_match('/<link +(.+?) *\/?>/i',$req['body'],$parts) &&
-				preg_match('/rel *= *"pingback"/i',$parts[1]) &&
-				preg_match('/href *= *" *(.+?) *"/i',$parts[1],$href))
+				preg_match('/<link\h+(.+?)\h*\/?>/i',$req['body'],$parts) &&
+				preg_match('/rel\h*=\h*"pingback"/i',$parts[1]) &&
+				preg_match('/href\h*=\h*"\h*(.+?)\h*"/i',$parts[1],$href))
 				$found=$href[1];
 		}
 		return $found;

@@ -112,7 +112,7 @@ final class Base {
 		@param $key string
 	**/
 	private function cut($key) {
-		return preg_split('/\[ *[\'"]?(.+?)[\'"]? *\]|(->)|\./',
+		return preg_split('/\[\h*[\'"]?(.+?)[\'"]?\h*\]|(->)|\./',
 			$key,NULL,PREG_SPLIT_NO_EMPTY|PREG_SPLIT_DELIM_CAPTURE);
 	}
 
@@ -687,8 +687,8 @@ final class Base {
 				preg_match_all(
 					'/(?<=^|\n)(?:'.
 					'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
-					'(.+?)[ \t]*=[ \t]*'.
-					'((?:\\\\[ \t]*\r?\n|.+?)*)'.
+					'(.+?)\h*=\h*'.
+					'((?:\\\\\h*\r?\n|.+?)*)'.
 					')(?=\r?\n|$)/',
 					file_get_contents($file),$matches,PREG_SET_ORDER);
 				if ($matches)
@@ -696,7 +696,7 @@ final class Base {
 						if (isset($match[1]) &&
 							!array_key_exists($match[1],$lex))
 							$lex[$match[1]]=preg_replace(
-								'/\\\\[ \t]*\r?\n/','',$match[2]);
+								'/\\\\\h*\r?\n/','',$match[2]);
 			}
 		}
 		return $lex;
@@ -882,7 +882,7 @@ final class Base {
 		@param $kbps int
 	**/
 	function route($pattern,$handler,$ttl=0,$kbps=0) {
-		$parts=preg_split('/ +/',$pattern,2,PREG_SPLIT_NO_EMPTY);
+		$parts=preg_split('/\h+/',$pattern,2,PREG_SPLIT_NO_EMPTY);
 		if (count($parts)<2)
 			user_error(sprintf(self::E_Pattern,$pattern));
 		list($verbs,$url)=$parts;
@@ -1075,7 +1075,7 @@ final class Base {
 	function call($func,array $args=NULL,$hooks='') {
 		// Execute function; abort if callback/hook returns FALSE
 		if (is_string($func) &&
-			preg_match('/(.+) *(->|::) *(.+)/s',$func,$parts)) {
+			preg_match('/(.+)\h*(->|::)\h*(.+)/s',$func,$parts)) {
 			// Convert string to executable PHP callback
 			if (!class_exists($parts[1]))
 				$this->error(404);
@@ -1133,8 +1133,8 @@ final class Base {
 			'/(?<=^|\n)(?:'.
 			'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
 			'(?:\[(.+?)\])|'.
-			'(.+?)[ \t]*=[ \t]*'.
-			'((?:\\\\[ \t]*\r?\n|.+?)*)'.
+			'(.+?)\h*=\h*'.
+			'((?:\\\\\h*\r?\n|.+?)*)'.
 			')(?=\r?\n|$)/',
 			file_get_contents($file),$matches,PREG_SET_ORDER);
 		if ($matches) {
@@ -1160,7 +1160,7 @@ final class Base {
 									defined($val))
 									return constant($val);
 								return preg_replace(
-									'/\\\\[ \t]*\r?\n/','',$val);
+									'/\\\\\h*\r?\n/','',$val);
 							},
 							str_getcsv(
 								// Mark quoted strings with 0x00 whitespace
@@ -1657,14 +1657,15 @@ final class Cache {
 					else
 						memcache_add_server($this->ref,$host,$port);
 				}
-			if (empty($this->ref) && !preg_match('/folder=/',$dsn))
+			if (empty($this->ref) && !preg_match('/folder\h*=/',$dsn))
 				$dsn=($grep=preg_grep('/^(apc|wincache|xcache)/',
 					array_map('strtolower',get_loaded_extensions())))?
 						// Auto-detect
 						current($grep):
 						// Use filesystem as fallback
 						('folder='.$fw->get('TEMP').'cache/');
-			if (preg_match('/folder=(.+)/',$dsn,$parts) && !is_dir($parts[1]))
+			if (preg_match('/folder\h*=\h*(.+)/',$dsn,$parts) &&
+				!is_dir($parts[1]))
 				mkdir($parts[1],Base::MODE,TRUE);
 		}
 		return $this->dsn=$dsn;
