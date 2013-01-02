@@ -1000,44 +1000,35 @@ final class Base {
 						$hash=$this->hash($this->hive['VERB'].' '.
 							$this->hive['URI']).'.url',$data);
 					if ($cached && $cached+$ttl>$now) {
-						if (empty($headers['If-Modified-Since']) ||
-							floor($cached)>
+						if (isset($headers['If-Modified-Since']) &&
+							floor($cached)<
 								strtotime($headers['If-Modified-Since'])) {
-							// Retrieve from cache backend
-							list($headers,$body)=$data;
-							if (PHP_SAPI!='cli')
-								array_walk($headers,'header');
-							// Override headers
-							$this->expire($cached+$ttl-$now);
-						}
-						else {
 							// HTTP client-cached page is fresh
 							$this->status(304);
 							die;
 						}
+						// Retrieve from cache backend
+						list($headers,$body)=$data;
+						if (PHP_SAPI!='cli')
+							array_walk($headers,'header');
+						// Override headers
+						$this->expire($cached+$ttl-$now);
 					}
-					else {
+					else
 						// Expire HTTP client-cached page
 						$this->expire($ttl);
-						ob_start();
-						// Call route handler
-						$this->call($handler,array($this,$args),
-							'beforeroute,afterroute');
-						$body=ob_get_clean();
-						if (!error_get_last())
-							// Save to cache backend
-							$cache->set($hash,
-								array(headers_list(),$body),$ttl);
-					}
 				}
-				else {
+				else
 					$this->expire(0);
-					ob_start();
-					// Call route handler
-					$this->call($handler,array($this,$args),
-						'beforeroute,afterroute');
-					$body=ob_get_clean();
-				}
+				ob_start();
+				// Call route handler
+				$this->call($handler,array($this,$args),
+					'beforeroute,afterroute');
+				$body=ob_get_clean();
+				if ($ttl && !error_get_last())
+					// Save to cache backend
+					$cache->set($hash,
+						array(headers_list(),$body),$ttl);
 				if ($this->hive['RESPONSE']=$body) {
 					$ctr=0;
 					foreach (str_split($body,1024) as $part) {
