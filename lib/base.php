@@ -1263,7 +1263,6 @@ final class Base {
 			$text='<?php '.$text;
 			$pre=TRUE;
 		}
-		$ref=new ReflectionExtension('tokenizer');
 		foreach (token_get_all($text) as $token)
 			if ($pre)
 				$pre=FALSE;

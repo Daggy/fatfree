@@ -38,7 +38,6 @@ class Auth extends Prefab {
 	**/
 	function login($id,$pw,$realm=NULL) {
 		if (is_object($this->storage)) {
-			$found=FALSE;
 			switch (get_class($this->storage)) {
 				case 'DB\Jig\Mapper':
 					return (bool)
@@ -115,8 +114,7 @@ class Auth extends Prefab {
 					$socket=@fsockopen(
 						(strtolower($this->args['scheme'])=='ssl'?
 							'ssl://':'').$this->args['host'],
-							$this->args['port'],
-						$code,$text);
+							$this->args['port'],$code,$text);
 					$dialog=function($cmd=NULL) use($socket) {
 						if (!is_null($cmd))
 							fputs($socket,$cmd."\r\n");
