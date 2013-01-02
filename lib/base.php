@@ -94,6 +94,8 @@ final class Base {
 		$defaults,
 		//! Language lookup sequence
 		$languages,
+		//! Equivalent Locales
+		$locales,
 		//! NULL reference
 		$null=NULL;
 
@@ -201,9 +203,9 @@ final class Base {
 				break;
 			case 'LANGUAGE':
 				$val=$this->language($val);
-				$lex=$this->locales($this->hive['LOCALES']);
+				$lex=$this->lexicon($this->hive['LOCALES']);
 			case 'LOCALES':
-				if (isset($lex) || $lex=$this->locales($val))
+				if (isset($lex) || $lex=$this->lexicon($val))
 					$this->mset($lex,NULL,$ttl);
 				break;
 			case 'TZ':
@@ -586,20 +588,7 @@ final class Base {
 	function format() {
 		$args=func_get_args();
 		$val=array_shift($args);
-		$list=array();
-		$windows=preg_match('/^win/i',PHP_OS);
-		foreach ($this->languages as $language) {
-			if ($windows) {
-				$parts=explode('_',$language);
-				$language=@constant('ISO::LC_'.$parts[0]);
-				if (isset($parts[1]) &&
-					$country=@constant('ISO::CC_'.$parts[1]))
-					$language.='_'.$country;
-			}
-			$list[]=$language;
-			$list[]=$language.'.'.$this->hive['ENCODING'];
-		}
-		setlocale(LC_ALL,$list);
+		setlocale(LC_ALL,$this->locales);
 		// Get formatting rules
 		$conv=localeconv();
 		if (!is_array($args))
@@ -648,7 +637,7 @@ final class Base {
 			},
 			$val
 		);
-		return $windows?
+		return preg_match('/^win/i',PHP_OS)?
 			iconv('Windows-1252',$this->hive['ENCODING'],$out):$out;
 	}
 
@@ -668,6 +657,19 @@ final class Base {
 		if (isset($parts[2]))
 			// Specific language
 			array_unshift($this->languages,$parts[0]);
+		$this->locales=array();
+		$windows=preg_match('/^win/i',PHP_OS);
+		foreach ($this->languages as $language) {
+			if ($windows) {
+				$parts=explode('_',$language);
+				$language=@constant('ISO::LC_'.$parts[0]);
+				if (isset($parts[1]) &&
+					$country=@constant('ISO::CC_'.$parts[1]))
+					$language.='_'.$country;
+			}
+			$this->locales[]=$language;
+			$this->locales[]=$language.'.'.$this->hive['ENCODING'];
+		}
 		return $parts[0];
 	}
 
@@ -676,7 +678,7 @@ final class Base {
 		@return NULL
 		@param $path string
 	**/
-	function locales($path) {
+	function lexicon($path) {
 		$lex=array();
 		foreach ($this->languages as $language) {
 			if ((is_file($file=($base=$path.$language).'.php') ||
