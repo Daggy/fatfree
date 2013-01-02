@@ -594,45 +594,45 @@ final class Base {
 		if (!is_array($args))
 			$args=array($args);
 		$out=preg_replace_callback(
-			'/{(?P<index>\d+)(?:,(?P<format>\w+)(?:,(?P<type>\w+))?)?}/',
+			'/{(\d+)(?:,(\w+)(?:,(\w+))?)?}/',
 			function($expr) use($args,$conv) {
-				if (empty($args[$expr['index']]))
+				if (empty($args[$expr[1]]))
 					return $expr[0];
-				if (empty($expr['format']))
-					return $args[$expr['index']];
-				switch ($expr['format']) {
+				if (empty($expr[2]))
+					return $args[$expr[1]];
+				switch ($expr[2]) {
 					case 'number':
-						if (empty($expr['type']))
-							return sprintf('%f',$args[$expr['index']]);
-						switch ($expr['type']) {
+						if (empty($expr[3]))
+							return sprintf('%f',$args[$expr[1]]);
+						switch ($expr[3]) {
 							case 'integer':
 								return
 									number_format(
-										$args[$expr['index']],0,'',
+										$args[$expr[1]],0,'',
 										$conv['thousands_sep']);
 							case 'currency':
 								return
 									$conv['currency_symbol'].
 									number_format(
-										$args[$expr['index']],
+										$args[$expr[1]],
 										$conv['frac_digits'],
 										$conv['decimal_point'],
 										$conv['thousands_sep']);
 							case 'percent':
 								return
 									number_format(
-										$args[$expr['index']]*100,0,
+										$args[$expr[1]]*100,0,
 										$conv['decimal_point'],
 										$conv['thousands_sep']).'%';
 						}
 					case 'date':
-						return strftime(empty($expr['type']) ||
-							$expr['type']=='short'?'%x':'%A, %d %B %Y',
-							$args[$expr['index']]);
+						return strftime(empty($expr[3]) ||
+							$expr[3]=='short'?'%x':'%A, %d %B %Y',
+							$args[$expr[1]]);
 					case 'time':
-						return strftime('%X',$args[$expr['index']]);
+						return strftime('%X',$args[$expr[1]]);
 					default:
-						return $args[$expr['index']];
+						return $args[$expr[1]];
 				}
 			},
 			$val
