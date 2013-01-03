@@ -792,9 +792,8 @@ final class Base {
 			$line='';
 			if (isset($frame['file']) &&
 				($frame['file']!=__FILE__ || $this->hive['DEBUG']>1) &&
-				(empty($frame['class']) || $frame['class']!=__CLASS__) &&
 				(empty($frame['function']) ||
-				!preg_match('/^(?:(?:trigger|user)_error|'.
+				!preg_match('/^(?:(?:trigger|user)_error|{closure}|'.
 					'__call|call_user_func)/',$frame['function']))) {
 				$line=$this->fixslashes($frame['file']).':'.
 					$frame['line'].' ';
