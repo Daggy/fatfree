@@ -128,8 +128,9 @@ final class Base {
 	function &ref($key,$add=TRUE) {
 		$parts=$this->cut($key);
 		if ($parts[0]=='SESSION') {
+			$id=session_id();
 			@session_start();
-			if (empty($parts[1]))
+			if (!$id)
 				session_regenerate_id(TRUE);
 			$this->sync('SESSION');
 		}
