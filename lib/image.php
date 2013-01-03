@@ -51,8 +51,10 @@ class Image {
 		if (($len=strlen($hex))>6)
 			user_error(sprintf(self::E_Color,'0x'.$hex));
 		$color=str_split($hex,$len/3);
-		foreach ($color as &$hue)
+		foreach ($color as &$hue) {
 			$hue=hexdec(str_repeat($hue,6/$len));
+			unset($hue);
+		}
 		return $color;
 	}
 
