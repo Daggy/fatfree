@@ -2107,16 +2107,27 @@ class ISO extends Prefab {
 	//@}
 
 	/**
+		Convert class constants to array
+		@return array
+		@param $prefix string
+	**/
+	protected function constants($prefix) {
+		$ref=new ReflectionClass($this);
+		$out=array();
+		foreach (preg_grep('/^'.$prefix.'/',array_keys($ref->getconstants()))
+			as $val) {
+			$out[$key=substr($val,strlen($prefix))]=
+				constant('self::'.$prefix.$key);
+		}
+		return $out;
+	}
+
+	/**
 		Return list of languages indexed by ISO 639-1 language code
 		@return array
 	**/
 	function languages() {
-		$ref=new ReflectionClass($this);
-		$out=array();
-		foreach (preg_grep('/LC_/',array_keys($ref->getconstants()))
-			as $key=>$val)
-			$out[$key=substr(strstr($val,'_'),1)]=constant('self::LC_'.$key);
-		return $out;
+		return $this->constants('LC_');
 	}
 
 	/**
@@ -2124,12 +2135,7 @@ class ISO extends Prefab {
 		@return array
 	**/
 	function countries() {
-		$ref=new ReflectionClass($this);
-		$out=array();
-		foreach (preg_grep('/CC_/',array_keys($ref->getconstants()))
-			as $key=>$val)
-			$out[$key=substr(strstr($val,'_'),1)]=constant('self::CC_'.$key);
-		return $out;
+		return $this->constants('CC_');
 	}
 
 }
