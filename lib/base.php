@@ -419,8 +419,6 @@ final class Base {
 	function stringify($arg) {
 		switch (gettype($arg)) {
 			case 'object':
-				if (method_exists($arg,'__tostring'))
-					return stripslashes($arg);
 				$str='';
 				if ($this->hive['DEBUG']>2)
 					foreach ((array)$arg as $key=>$val)
@@ -430,14 +428,12 @@ final class Base {
 				return addslashes(get_class($arg)).'::__set_state('.$str.')';
 			case 'array':
 				$str='';
-				if ($arg) {
-					$num=isset($arg[0]) &&
-						ctype_digit(implode('',array_keys($arg)));
-					foreach ($arg as $key=>$val)
-						$str.=($str?',':'').
-							($num?'':($this->stringify($key).'=>')).
-							$this->stringify($val);
-				}
+				$num=isset($arg[0]) &&
+					ctype_digit(implode('',array_keys($arg)));
+				foreach ($arg as $key=>$val)
+					$str.=($str?',':'').
+						($num?'':($this->stringify($key).'=>')).
+						$this->stringify($val);
 				return 'array('.$str.')';
 			default:
 				return var_export(
