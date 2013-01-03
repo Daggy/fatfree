@@ -785,7 +785,7 @@ final class Base {
 		$prior=$this->hive['ERROR'];
 		$header=$this->status($code);
 		$req=$this->hive['VERB'].' '.$this->hive['URI'];
-		error_log($text=$text?:('HTTP '.$code.' '.$header.' ('.$req.')'));
+		error_log($text=$text?:('HTTP '.$code.' ('.$req.')'));
 		$out='';
 		$eol="\n";
 		if (!$trace)
@@ -995,8 +995,8 @@ final class Base {
 							$this->hive['URI']).'.url',$data);
 					if ($cached && $cached+$ttl>$now) {
 						if (isset($headers['If-Modified-Since']) &&
-							floor($cached)<
-								strtotime($headers['If-Modified-Since'])) {
+							strtotime($headers['If-Modified-Since'])>
+							floor($cached)) {
 							// HTTP client-cached page is fresh
 							$this->status(304);
 							die;
