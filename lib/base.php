@@ -180,7 +180,6 @@ final class Base {
 			Cache::instance()->exists($this->hash($key).'.var');
 	}
 
-
 	/**
 		Bind value to hive key
 		@return mixed
@@ -292,7 +291,7 @@ final class Base {
 				}
 				else
 					$out.='['.$this->stringify($part).']';
-			// PHP can't unset a referenced array/object directly
+			// PHP can't unset a referenced variable
 			eval('unset($this->hive'.$out.');');
 			if ($cache->exists($hash=$this->hash($key).'.var'))
 				// Remove from cache
@@ -819,7 +818,7 @@ final class Base {
 		);
 		if ($this->hive['ONERROR'])
 			// Execute custom error handler
-			$this->call($this->hive['ONERROR'],array($this));
+			$this->call($this->hive['ONERROR'],$this);
 		elseif (!$prior && PHP_SAPI!='cli' && !$this->hive['QUIET']) {
 			header('Connection: close');
 			echo
@@ -1061,10 +1060,12 @@ final class Base {
 		Execute callback/hooks (supports 'class->method' format)
 		@return mixed|FALSE
 		@param $func callback
-		@param $args array
+		@param $args mixed
 		@param $hooks string
 	**/
-	function call($func,array $args=NULL,$hooks='') {
+	function call($func,$args=NULL,$hooks='') {
+		if (!is_array($args))
+			$args=array($args);
 		// Execute function; abort if callback/hook returns FALSE
 		if (is_string($func) &&
 			preg_match('/(.+)\h*(->|::)\h*(.+)/s',$func,$parts)) {
@@ -1103,16 +1104,30 @@ final class Base {
 	}
 
 	/**
-		Execute specified callbacks in succession
+		Execute specified callbacks in succession; Apply same arguments
+		to all callbacks
 		@return array
 		@param $funcs array|string
-		@param $args array
+		@param $args mixed
 	**/
-	function chain($funcs,array $args=NULL) {
+	function chain($funcs,$args=NULL) {
 		$out=array();
 		foreach (is_array($funcs)?$funcs:$this->split($funcs) as $func)
 			$out[]=$this->call($func,$args);
 		return $out;
+	}
+
+	/**
+		Execute specified callbacks in succession; Pass result of
+		previous callback as argument to the next callback
+		@return array
+		@param $funcs array|string
+		@param $args mixed
+	**/
+	function digest($funcs,$args=NULL) {
+		foreach (is_array($funcs)?$funcs:$this->split($funcs) as $func)
+			$args=array($this->call($func,$args));
+		return array_shift($args);
 	}
 
 	/**
@@ -1188,7 +1203,7 @@ final class Base {
 			@unlink($lock);
 		while (!$handle=@fopen($lock,'x'))
 			usleep(mt_rand(0,100));
-		$out=$this->call($func,is_array($args)?:array($args));
+		$out=$this->call($func,$args);
 		fclose($handle);
 		@unlink($lock);
 		return $out;

@@ -196,6 +196,14 @@ class Router extends Controller {
 			$f3->get('called'),
 			'Call lambda function'
 		);
+		$test->expect(
+			$f3->chain('App\a,App\b,App\c',1)==array(1,2,4),
+			'Callback chain()'
+		);
+		$test->expect(
+			$f3->digest('App\a,App\b,App\c',1)==8,
+			'Callback digest()'
+		);
 		$f3->set('results',$test->results());
 	}
 
@@ -203,4 +211,16 @@ class Router extends Controller {
 
 function callee() {
 	\Base::instance()->set('called',TRUE);
+}
+
+function a($x) {
+	return $x;
+}
+
+function b($y) {
+	return $y*2;
+}
+
+function c($z) {
+	return $z*4;
 }
