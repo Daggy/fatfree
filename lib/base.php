@@ -796,6 +796,7 @@ final class Base {
 			$line='';
 			if (isset($frame['file']) &&
 				($frame['file']!=__FILE__ || $this->hive['DEBUG']>1) &&
+				(empty($frame['class']) || $frame['class']!=__CLASS__) &&
 				(empty($frame['function']) ||
 				!preg_match('/^(?:(?:trigger|user)_error|'.
 					'__call|call_user_func)/',$frame['function']))) {
