@@ -201,8 +201,8 @@ class Router extends Controller {
 			'Callback chain()'
 		);
 		$test->expect(
-			$f3->digest('App\a,App\b,App\c',1)==8,
-			'Callback digest()'
+			$f3->relay('App\a,App\b,App\c',1)==8,
+			'Callback relay()'
 		);
 		$f3->set('results',$test->results());
 	}

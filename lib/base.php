@@ -1118,13 +1118,13 @@ final class Base {
 	}
 
 	/**
-		Execute specified callbacks in succession; Pass result of
+		Execute specified callbacks in succession; Relay result of
 		previous callback as argument to the next callback
 		@return array
 		@param $funcs array|string
 		@param $args mixed
 	**/
-	function digest($funcs,$args=NULL) {
+	function relay($funcs,$args=NULL) {
 		foreach (is_array($funcs)?$funcs:$this->split($funcs) as $func)
 			$args=array($this->call($func,$args));
 		return array_shift($args);
