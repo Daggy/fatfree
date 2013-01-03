@@ -461,7 +461,7 @@ class Image {
 			foreach (glob($path.'*.png',GLOB_NOSORT) as $match)
 				if (preg_match('/-(\d+)\.png/',$match,$parts) &&
 					$parts[1]>$state)
-					$fw->unlink($match);
+					@unlink($match);
 			$this->count=$state;
 		}
 		return $this;
@@ -513,7 +513,7 @@ class Image {
 				$fw->hash($this->file);
 			foreach (glob($path.'*.png',GLOB_NOSORT) as $match)
 				if (preg_match('/-(\d+)\.png/',$match))
-					$fw->unlink($match);
+					@unlink($match);
 		}
 	}
 

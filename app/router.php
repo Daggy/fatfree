@@ -21,7 +21,7 @@ class Router extends Controller {
 				sprintf('%.1f',(microtime(TRUE)-$val)*1e3).'ms'):'')
 		);
 		if (is_file($file))
-			$f3->unlink($file);
+			@unlink($file);
 		$f3->clear('ROUTES');
 		$f3->route('GET /',
 			function($f3) {

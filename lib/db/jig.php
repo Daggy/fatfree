@@ -75,9 +75,8 @@ class Jig {
 		@return NULL
 	**/
 	function drop() {
-		$fw=\Base::instance();
 		foreach (glob($this->dir.'/*',GLOB_NOSORT) as $file)
-			@$fw->unlink($file);
+			@unlink($file);
 	}
 
 	/**

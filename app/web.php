@@ -44,7 +44,7 @@ class Web extends Controller {
 			is_file($target=$f3->get('UPLOADS').basename($file)),
 			'Upload file via PUT'
 		);
-		$f3->unlink($target);
+		@unlink($target);
 		$f3->clear('ROUTES');
 		$f3->clear('BODY');
 		$f3->set('CACHE',TRUE);
