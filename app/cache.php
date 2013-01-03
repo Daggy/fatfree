@@ -31,7 +31,7 @@ class Cache extends Controller {
 				$cache===\Cache::instance(),
 				'Same cache engine instance returned'
 			);
-			$cache->set($f3->hash('foo'),'bar');
+			$cache->set($f3->hash('foo').'.var','bar');
 			$test->expect(
 				$f3->get('foo')=='bar',
 				'Retrieve previously cached entry'
