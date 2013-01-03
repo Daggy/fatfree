@@ -1164,43 +1164,8 @@ final class Base {
 	}
 
 	/**
-		Obtain exclusive locks on specified files and invoke callback;
-		Release locks after callback execution
-		@return mixed
-		@param $files string|array
-		@param $func callback
-		@param $args array
-	**/
-	function mutex($files,$func,array $args=NULL) {
-		$handles=array();
-		if (!is_dir($tmp=$this->hive['TEMP']))
-			mkdir($tmp,self::MODE,TRUE);
-		// Max lock duration
-		$max=ini_get('max_execution_time');
-		foreach (is_array($files)?$files:$this->split($files) as $file) {
-			// Use filesystem lock
-			if (is_file($lock=$tmp.'/'.
-				$this->hash($this->hive['ROOT'].$this->hive['BASE']).'.'.
-				$this->hash($file).'.lock') &&
-				filemtime($lock)+$max<microtime(TRUE))
-				// Stale lock
-				unlink($lock);
-			while (!$handle=@fopen($lock,'x'))
-				usleep(mt_rand(0,100));
-			$handles[$lock]=$handle;
-		}
-		// Allow class->method format
-		$out=$this->call($func,$args?:array());
-		foreach ($handles as $lock=>$handle) {
-			fclose($handle);
-			unlink($lock);
-		}
-		return $out;
-	}
-
-	/**
-		Exclusive file read
-		@return string|FALSE
+		Read file
+		@return string
 		@param $file string
 	**/
 	function read($file) {
