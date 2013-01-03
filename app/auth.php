@@ -27,6 +27,7 @@ class Auth extends Controller {
 			$auth->login('admin','secret') && !$auth->login('user','what'),
 			'Login auth mechanism (Jig storage)'
 		);
+		$db->drop();
 		if (extension_loaded('mongo')) {
 			try {
 				$db=new \DB\Mongo('mongodb://localhost:27017','test');
