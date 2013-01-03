@@ -645,7 +645,7 @@ final class Base {
 	function language($code) {
 		$this->languages=array(self::FALLBACK);
 		// Validate string/header
-		if (!preg_match('/^(\w{2})(?:_(\w{2}))?\b/',$code,$parts))
+		if (!preg_match('/^(\w{2})(?:_(\w{2}))?\b/',strtolower($code),$parts))
 			return self::FALLBACK;
 		if ($parts[1]!=self::FALLBACK)
 			// Generic language
@@ -678,7 +678,7 @@ final class Base {
 		$lex=array();
 		foreach ($this->languages as $language) {
 			if ((is_file($file=($base=$path.$language).'.php') ||
-				is_file($file=strtolower($base).'.php')) &&
+				is_file($file=$base.'.php')) &&
 				is_array($dict=require($file)))
 				$lex+=$dict;
 			elseif (is_file($file=$base.'.ini')) {
@@ -1030,8 +1030,7 @@ final class Base {
 							if ($ctr/$kbps>$elapsed=microtime(TRUE)-$now)
 								usleep(1e6*($ctr/$kbps-$elapsed));
 							set_time_limit(ini_get('max_execution_time'));
-							if (!$this->hive['QUIET'])
-								echo $part;
+							echo $part;
 						}
 					}
 					else
@@ -1275,7 +1274,7 @@ final class Base {
 
 	/**
 		Namespace-aware class autoloader
-		@return NULL
+		@return mixed
 		@param $class string
 	**/
 	protected function autoload($class) {
@@ -1283,10 +1282,8 @@ final class Base {
 		foreach ($this->split($this->hive['PLUGINS'].';'.
 			$this->hive['AUTOLOAD']) as $auto)
 			if (is_file($file=$auto.$class.'.php') ||
-				is_file($file=$auto.strtolower($class).'.php')) {
-				require($file);
-				return;
-			}
+				is_file($file=$auto.strtolower($class).'.php'))
+				return require($file);
 	}
 
 	/**
