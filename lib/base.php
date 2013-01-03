@@ -1198,43 +1198,22 @@ final class Base {
 
 	/**
 		Exclusive file read
-		@return string
+		@return string|FALSE
 		@param $file string
 	**/
 	function read($file) {
-		return $this->mutex($file,'file_get_contents',array($file));
+		return file_get_contents($file);
 	}
 
 	/**
 		Exclusive file write
-		@return int
+		@return int|FALSE
 		@param $file string
 		@param $data mixed
 		@param $append bool
 	**/
 	function write($file,$data,$append=FALSE) {
-		return $this->mutex($file,
-			'file_put_contents',
-			array($file,$data,LOCK_EX|($append?FILE_APPEND:0)));
-	}
-
-	/**
-		Exclusive file rename
-		@return bool
-		@param $from string
-		@param $to string
-	**/
-	function rename($from,$to) {
-		return $this->mutex($from,'rename',array($from,$to));
-	}
-
-	/**
-		Exclusive file delete
-		@return bool
-		@param $file string
-	**/
-	function unlink($file) {
-		return $this->mutex($file,'unlink',array($file));
+		return file_put_contents($file,$data,LOCK_EX|($append?FILE_APPEND:0));
 	}
 
 	/**
@@ -1563,7 +1542,7 @@ final class Cache {
 			case 'xcache':
 				return xcache_unset($ndx);
 			case 'folder':
-				return is_file($file=$parts[1].$ndx) && $fw->unlink($file);
+				return is_file($file=$parts[1].$ndx) && @unlink($file);
 		}
 		return FALSE;
 	}
@@ -1613,7 +1592,7 @@ final class Cache {
 				foreach (glob($parts[1].'*') as $file)
 					if (preg_match($regex,basename($file)) &&
 						filemtime($file)+$lifetime<time())
-						Base::instance()->unlink($file);
+						@unlink($file);
 				return TRUE;
 		}
 		return FALSE;
