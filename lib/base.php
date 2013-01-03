@@ -1164,6 +1164,33 @@ final class Base {
 	}
 
 	/**
+		Create mutex, invoke callback then drop ownership when done
+		@return mixed
+		@param $id string
+		@param $func callback
+		@param $args mixed
+	**/
+	function mutex($id,$func,$args=NULL) {
+		if (!is_dir($tmp=$this->hive['TEMP']))
+			mkdir($tmp,self::MODE,TRUE);
+		// Max lock duration
+		$max=ini_get('max_execution_time');
+		// Use filesystem lock
+		if (is_file($lock=$tmp.
+			$this->hash($this->hive['ROOT'].$this->hive['BASE']).'.'.
+			$this->hash($id).'.lock') &&
+			filemtime($lock)+$max<microtime(TRUE))
+			// Stale lock
+			@unlink($lock);
+		while (!$handle=@fopen($lock,'x'))
+			usleep(mt_rand(0,100));
+		$out=$this->call($func,is_array($args)?:array($args));
+		fclose($handle);
+		@unlink($lock);
+		return $out;
+	}
+
+	/**
 		Read file
 		@return string
 		@param $file string
