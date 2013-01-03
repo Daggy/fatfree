@@ -143,18 +143,16 @@ final class Base {
 			if ($part=='->')
 				$obj=TRUE;
 			elseif ($obj) {
+				$obj=FALSE;
 				if ($add) {
 					if (!is_object($var))
 						$var=new stdclass;
-					if (isset($var->$part))
-						$var->$part=$this->null;
 					$var=&$var->$part;
 				}
 				elseif (isset($var->$part))
 					$var=$var->$part;
 				else
 					return $this->null;
-				$obj=FALSE;
 			}
 			elseif ($add) {
 				if (!is_array($var))
