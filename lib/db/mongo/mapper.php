@@ -143,9 +143,11 @@ class Mapper extends \DB\Cursor {
 		$result=iterator_to_array($cursor,FALSE);
 		$out=array();
 		foreach ($result as &$doc) {
-			foreach ($doc as &$val)
+			foreach ($doc as &$val) {
 				if (is_array($val))
 					$val=json_decode(json_encode($val));
+				unset($val);
+			}
 			$out[]=$this->factory($doc);
 			unset($doc);
 		}
