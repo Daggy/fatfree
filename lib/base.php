@@ -90,8 +90,8 @@ final class Base {
 	private
 		//! Globals
 		$hive,
-		//! Default settings
-		$defaults,
+		//! Initial settings
+		$init,
 		//! Language lookup sequence
 		$languages,
 		//! Equivalent Locales
@@ -191,7 +191,7 @@ final class Base {
 			if ($expr[1]=='COOKIE') {
 				$parts=$this->cut($key);
 				call_user_func_array('setcookie',
-					array($parts[1],$val)+$this->hive['JAR']);
+					array_merge(array($parts[1],$val),$this->hive['JAR']));
 			}
 		}
 		else switch ($key) {
@@ -249,9 +249,19 @@ final class Base {
 		// Normalize array literal
 		$cache=Cache::instance();
 		$parts=$this->cut($key);
-		if ($parts[0]=='CACHE')
+		if ($key=='CACHE')
 			// Clear cache contents
 			$cache->reset();
+		elseif (preg_match('/^(GET|POST|COOKIE)\b(.+)/',$key,$expr)) {
+			$this->clear('REQUEST'.$expr[2]);
+			if ($expr[1]=='COOKIE') {
+				$parts=$this->cut($key);
+				$jar=$this->hive['JAR'];
+				$jar['expire']=strtotime('-1 year');
+				call_user_func_array('setcookie',
+					array_merge(array($parts[1],''),$jar));
+			}
+		}
 		elseif ($parts[0]=='SESSION') {
 			@session_start();
 			if (empty($parts[1])) {
@@ -263,20 +273,9 @@ final class Base {
 			}
 			$this->sync('SESSION');
 		}
-		elseif (preg_match('/^(GET|POST|COOKIE)\b(.+)/',$key,$expr)) {
-			$this->clear('REQUEST'.$expr[2]);
-			if ($expr[1]=='COOKIE') {
-				$parts=$this->cut($key);
-				$jar=$this->hive['JAR'];
-				$jar['expire']=strtotime('-1 year');
-				call_user_func_array('setcookie',
-					array($parts[1],'')+$jar);
-			}
-		}
-		if (!isset($parts[1]) &&
-			array_key_exists($parts[0],$this->defaults))
+		if (!isset($parts[1]) && array_key_exists($parts[0],$this->init))
 			// Reset global to default value
-			$this->hive[$parts[0]]=$this->defaults[$parts[0]];
+			$this->hive[$parts[0]]=$this->init[$parts[0]];
 		else {
 			$out='';
 			$obj=FALSE;
@@ -1199,8 +1198,7 @@ final class Base {
 			filemtime($lock)+$max<microtime(TRUE))
 			// Stale lock
 			@unlink($lock);
-		while (!$handle=@fopen($lock,'x'))
-			usleep(mt_rand(0,100));
+		for (;!$handle=@fopen($lock,'x');usleep(mt_rand(0,100)));
 		$out=$this->call($func,$args);
 		fclose($handle);
 		@unlink($lock);
@@ -1323,7 +1321,7 @@ final class Base {
 		set_error_handler(
 			function($code,$text) use($fw) {
 				if (error_reporting())
-					throw new ErrorException($text);
+					throw new ErrorException($text,$code);
 			}
 		);
 		if (!isset($_SERVER['SERVER_NAME']))
@@ -1421,10 +1419,10 @@ final class Base {
 			// Override setting
 			$GLOBALS+=array('_ENV'=>$_ENV,'_REQUEST'=>$_REQUEST);
 		// Sync PHP globals with corresponding hive keys
-		$this->defaults=$this->hive;
+		$this->init=$this->hive;
 		foreach (explode('|',self::GLOBALS) as $global) {
 			$sync=$this->sync($global);
-			$this->defaults+=array(
+			$this->init+=array(
 				$global=>preg_match('/SERVER|ENV/',$global)?$sync:array()
 			);
 		}

@@ -276,7 +276,8 @@ class Web extends Prefab {
 				stream_context_create(array('http'=>$options)));
 			$result=array(
 				'body'=>$out,
-				'headers'=>$out?$http_response_header:array(),
+				'headers'=>isset($http_response_header)?
+					$http_response_header:array(),
 				'engine'=>'stream-wrapper',
 				'cached'=>FALSE
 			);
@@ -301,7 +302,7 @@ class Web extends Prefab {
 					$parts['path']='/';
 				if (empty($parts['query']))
 					$parts['query']='';
-				$socket=@fsockopen($parts['host'],$parts['port'],$code,$text);
+				$socket=@fsockopen($parts['host'],$parts['port']);
 				if (!$socket)
 					return FALSE;
 				stream_set_blocking($socket,TRUE);
@@ -400,15 +401,13 @@ class Web extends Prefab {
 									// Presume it's a regex pattern
 									$regex=TRUE;
 									// Backtrack and validate
-									$ofs=$ptr;
-									while ($ofs) {
-										$ofs--;
+									for ($ofs=$ptr;$ofs;$ofs--) {
 										// Pattern should be preceded by
 										// open parenthesis, colon,
 										// object property or operator
 										if (preg_match(
 											'/(return|[(:=!+\-*&|])$/',
-											substr($src,0,$ofs+1))) {
+											substr($src,0,$ofs))) {
 											$dst.='/';
 											$ptr++;
 											while ($ptr<$len) {
@@ -423,7 +422,7 @@ class Web extends Prefab {
 											}
 											break;
 										}
-										elseif (!ctype_space($src[$ofs])) {
+										elseif (!ctype_space($src[$ofs-1])) {
 											// Not a regex pattern
 											$regex=FALSE;
 											break;

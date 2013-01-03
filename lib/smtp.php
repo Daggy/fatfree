@@ -147,11 +147,9 @@ class SMTP extends Magic {
 		$fw=Base::instance();
 		// Connect to the server
 		$socket=&$this->socket;
-		$socket=@fsockopen($this->host,$this->port,$code,$text);
-		if (!$socket) {
-			user_error($text);
-			return;
-		}
+		$socket=@fsockopen($this->host,$this->port);
+		if (!$socket)
+			return FALSE;
 		stream_set_blocking($socket,TRUE);
 		// Get server's initial response
 		$this->dialog();

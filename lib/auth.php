@@ -114,7 +114,7 @@ class Auth extends Prefab {
 					$socket=@fsockopen(
 						(strtolower($this->args['scheme'])=='ssl'?
 							'ssl://':'').$this->args['host'],
-							$this->args['port'],$code,$text);
+							$this->args['port']);
 					$dialog=function($cmd=NULL) use($socket) {
 						if (!is_null($cmd))
 							fputs($socket,$cmd."\r\n");

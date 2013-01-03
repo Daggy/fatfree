@@ -239,9 +239,9 @@ class Mapper extends \DB\Cursor {
 	**/
 	function insert() {
 		$db=$this->db;
-		while (($id=dechex(microtime(TRUE)*100)) &&
-			($data=$db->read($this->file)) && isset($data[$id]))
-			usleep(mt_rand(0,100));
+		for (;($id=dechex(microtime(TRUE)*100)) &&
+			($data=$db->read($this->file)) && isset($data[$id]);
+			usleep(mt_rand(0,100)));
 		$this->id=$id;
 		$data[$id]=$this->document;
 		$db->write($this->file,$data);
