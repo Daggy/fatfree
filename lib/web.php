@@ -372,10 +372,9 @@ class Web extends Prefab {
 				if (is_file($save=$fw->fixslashes($dir.$file))) {
 					if ($fw->get('CACHE') &&
 						($cached=$cache->exists(
-							$hash=$fw->hash($fw->get('ROOT').
-							$fw->get('BASE')).'.'.$fw->hash($save),$data)) &&
+							$hash=$fw->hash($save).'.'.$ext[0],$data)) &&
 						$cached>filemtime($save))
-						$dst=$cache->get($hash);
+						$dst=$data;
 					else {
 						$src=$fw->read($save);
 						for ($ptr=0,$len=strlen($src);$ptr<$len;) {
