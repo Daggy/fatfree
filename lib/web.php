@@ -142,12 +142,9 @@ class Web extends Prefab {
 					if (empty($file['name']))
 						return FALSE;
 					$base=basename($file['name']);
-					if ($slug) {
-						preg_match('/(.+?)(\.\w+)?$/',$base,$parts);
-						$dst=$dir.$this->slug($parts[1]).$parts[2];
-					}
-					else
-						$dst=$dir.$base;
+					$dst=$dir.
+						($slug && preg_match('/(.+)(\.\w+)?$/',$base,$parts)?
+							$this->slug($parts[1]).$parts[2]:$base);
 					if ($file['error'] ||
 						$file['type']!=$this->mime($file['name']) ||
 						$overwrite && file_exists($dst) ||
@@ -167,8 +164,9 @@ class Web extends Prefab {
 	**/
 	function progress($id) {
 		// ID returned by session.upload_progress.name
-		return ini_get('session.upload_progress.enabled')?
-			$_SESSION[$id]['bytes_processed']:FALSE;
+		return ini_get('session.upload_progress.enabled') &&
+			isset($_SESSION[$id]['bytes_processed'])?
+				$_SESSION[$id]['bytes_processed']:FALSE;
 	}
 
 	/**
