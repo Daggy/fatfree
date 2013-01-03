@@ -125,6 +125,23 @@ class Hive extends Controller {
 			is_callable($f3->get('a->z.qux')),
 			'Object property containing lambda function'
 		);
+		$f3->set('i.j','bar');
+		$test->expect(
+			is_array($f3->get('i')) && $f3->get('i.j')=='bar',
+			'Multilevel array'
+		);
+		$f3->set('i.j.k','foo');
+		$test->expect(
+			is_array($f3->get('i')) && is_array($f3->get('i.j')) &&
+			$f3->get('i.j.k')=='foo',
+			'Modified array'
+		);
+		$test->expect(
+			is_null($f3->get('l.m.n')) &&
+			!is_array($f3->get('l')) && !is_array($f3->get('l.m')) &&
+			is_null($f3->get('l.m.n')),
+			'Non-existent array'
+		);
 		$f3->set('domains',
 			array(
 				'google.com'=>'Google',
