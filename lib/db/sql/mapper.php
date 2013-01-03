@@ -245,8 +245,10 @@ class Mapper extends \DB\Cursor {
 		@param $filter string|array
 	**/
 	function count($filter=NULL) {
-		list($out)=$this->select('COUNT(*) AS rows',$filter);
-		return $out->adhoc['rows']['value'];
+		list($result)=$this->select('COUNT(*) AS rows',$filter);
+		$out=$result->adhoc['rows']['value'];
+		unset($this->adhoc['rows']);
+		return $out;
 	}
 
 	/**
