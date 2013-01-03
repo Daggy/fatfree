@@ -171,7 +171,9 @@ final class Base {
 	**/
 	function exists($key) {
 		$ref=&$this->ref($key,FALSE);
-		return isset($ref)?TRUE:Cache::instance()->exists($this->hash($key));
+		return isset($ref)?
+			TRUE:
+			Cache::instance()->exists($this->hash($key).'.var');
 	}
 
 
@@ -216,7 +218,7 @@ final class Base {
 		$ref=$val;
 		if ($ttl)
 			// Persist the key-value pair
-			Cache::instance()->set($this->hash($key),$val);
+			Cache::instance()->set($this->hash($key).'.var',$val);
 		return $ref;
 	}
 
@@ -231,7 +233,7 @@ final class Base {
 			return $this->format($val,$args);
 		if (is_null($val)) {
 			// Attempt to retrieve from cache
-			if (Cache::instance()->exists($this->hash($key),$data))
+			if (Cache::instance()->exists($this->hash($key).'.var',$data))
 				return $data;
 		}
 		return $val;
@@ -288,7 +290,7 @@ final class Base {
 					$out.='['.$this->stringify($part).']';
 			// PHP can't unset a referenced array/object directly
 			eval('unset($this->hive'.$out.');');
-			if ($cache->exists($hash=$this->hash($key)))
+			if ($cache->exists($hash=$this->hash($key).'.var'))
 				// Remove from cache
 				$cache->clear($hash);
 		}
@@ -1527,7 +1529,6 @@ final class Cache {
 		@param $key string
 	**/
 	function clear($key) {
-		$fw=Base::instance();
 		if (!$this->dsn)
 			return;
 		$ndx=$this->prefix.'.'.$key;
