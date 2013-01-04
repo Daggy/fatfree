@@ -497,7 +497,7 @@ final class Base {
 	**/
 	function hash($str) {
 		return str_pad(base_convert(
-			hexdec(substr(md5($str),-16)),10,36),11,'0',STR_PAD_LEFT);
+			hexdec(substr(sha1($str),-16)),10,36),11,'0',STR_PAD_LEFT);
 	}
 
 	/**

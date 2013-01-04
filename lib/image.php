@@ -304,7 +304,7 @@ class Image {
 		list($r,$g,$b)=$this->rgb(mt_rand(0x333,0xCCC));
 		$fg=imagecolorallocate($this->data,$r,$g,$b);
 		imagefill($this->data,0,0,IMG_COLOR_TRANSPARENT);
-		$hash=md5($str);
+		$hash=sha1($str);
 		$ctr=count($sprites);
 		$dim=$blocks*(int)($size/$blocks)*2/$blocks;
 		for ($j=0,$y=ceil($blocks/2);$j<$y;$j++)
