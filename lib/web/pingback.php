@@ -15,7 +15,7 @@
 
 namespace Web;
 
-//! Pingback 1.0 protocol implementation
+//! Pingback 1.0 protocol (client and server) implementation
 class Pingback extends \Prefab {
 
 	private
@@ -102,9 +102,11 @@ class Pingback extends \Prefab {
 	**/
 	function listen($func,$path=NULL) {
 		$fw=\Base::instance();
-		header('X-Powered-By: '.$fw->get('PACKAGE'));
-		header('Content-Type: application/xml; '.
-			'charset='.$charset=$fw->get('ENCODING'));
+		if (PHP_SAPI!='cli') {
+			header('X-Powered-By: '.$fw->get('PACKAGE'));
+			header('Content-Type: application/xml; '.
+				'charset='.$charset=$fw->get('ENCODING'));
+		}
 		if (!$path)
 			$path=$fw->get('BASE');
 		$web=\Web::instance();
