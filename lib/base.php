@@ -816,8 +816,7 @@ final class Base {
 		if ($this->hive['ONERROR'])
 			// Execute custom error handler
 			$this->call($this->hive['ONERROR'],$this);
-		elseif (!$prior && PHP_SAPI!='cli' && !$this->hive['QUIET']) {
-			header('Connection: close');
+		elseif (!$prior && PHP_SAPI!='cli' && !$this->hive['QUIET'])
 			echo
 				'<!DOCTYPE html>'.
 				'<html>'.$eol.
@@ -832,7 +831,6 @@ final class Base {
 					($out && $debug?('<pre>'.$eol.$out.'</pre>'.$eol):'').
 				'</body>'.$eol.
 				'</html>';
-		}
 	}
 
 	/**
