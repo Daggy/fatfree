@@ -61,6 +61,18 @@ class Internals extends Controller {
 			$f3->camelcase('hello_world')=='helloWorld',
 			'Camel-case'
 		);
+		$hash=array();
+		$found=FALSE;
+		for ($i=0;$i<10000;$i++)
+			if (is_int(array_search(
+				$f3->hash(str_shuffle(uniqid())),$hash))) {
+				$found=TRUE;
+				break;
+			}
+		$test->expect(
+			!$found,
+			'No hash() collisions'
+		);
 		$_GET=array('foo'=>'ok<h1>foo</h1><p>bar<span>baz</span></p>');
 		$f3->scrub($_GET);
 		$test->expect(
