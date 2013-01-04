@@ -589,49 +589,45 @@ final class Base {
 		setlocale(LC_ALL,$this->locales);
 		// Get formatting rules
 		$conv=localeconv();
-		if (!is_array($args))
-			$args=array($args);
 		$out=preg_replace_callback(
 			'/{(\d+)(?:,(\w+)(?:,(\w+))?)?}/',
 			function($expr) use($args,$conv) {
 				if (empty($args[$expr[1]]))
 					return $expr[0];
-				if (empty($expr[2]))
-					return $args[$expr[1]];
-				switch ($expr[2]) {
-					case 'number':
-						if (empty($expr[3]))
-							return sprintf('%f',$args[$expr[1]]);
-						switch ($expr[3]) {
-							case 'integer':
-								return
-									number_format(
-										$args[$expr[1]],0,'',
-										$conv['thousands_sep']);
-							case 'currency':
-								return
-									$conv['currency_symbol'].
-									number_format(
-										$args[$expr[1]],
-										$conv['frac_digits'],
-										$conv['decimal_point'],
-										$conv['thousands_sep']);
-							case 'percent':
-								return
-									number_format(
-										$args[$expr[1]]*100,0,
-										$conv['decimal_point'],
-										$conv['thousands_sep']).'%';
-						}
-					case 'date':
-						return strftime(empty($expr[3]) ||
-							$expr[3]=='short'?'%x':'%A, %d %B %Y',
-							$args[$expr[1]]);
-					case 'time':
-						return strftime('%X',$args[$expr[1]]);
-					default:
-						return $args[$expr[1]];
-				}
+				if (isset($expr[2]))
+					switch ($expr[2]) {
+						case 'number':
+							if (empty($expr[3]))
+								return sprintf('%f',$args[$expr[1]]);
+							switch ($expr[3]) {
+								case 'integer':
+									return
+										number_format(
+											$args[$expr[1]],0,'',
+											$conv['thousands_sep']);
+								case 'currency':
+									return
+										$conv['currency_symbol'].
+										number_format(
+											$args[$expr[1]],
+											$conv['frac_digits'],
+											$conv['decimal_point'],
+											$conv['thousands_sep']);
+								case 'percent':
+									return
+										number_format(
+											$args[$expr[1]]*100,0,
+											$conv['decimal_point'],
+											$conv['thousands_sep']).'%';
+							}
+						case 'date':
+							return strftime(empty($expr[3]) ||
+								$expr[3]=='short'?'%x':'%A, %d %B %Y',
+								$args[$expr[1]]);
+						case 'time':
+							return strftime('%X',$args[$expr[1]]);
+					}
+				return $args[$expr[1]];
 			},
 			$val
 		);
@@ -686,7 +682,7 @@ final class Base {
 			elseif (is_file($file=$base.'.ini')) {
 				preg_match_all(
 					'/(?<=^|\n)(?:'.
-					'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
+					'(?:;[^\n]*)|(?:<\?php.+?\?>?)|'.
 					'(.+?)\h*=\h*'.
 					'((?:\\\\\h*\r?\n|.+?)*)'.
 					')(?=\r?\n|$)/',
@@ -788,25 +784,29 @@ final class Base {
 		$eol="\n";
 		if (!$trace)
 			$trace=array_slice(debug_backtrace(FALSE),1);
+		$debug=$this->hive['DEBUG'];
+		$trace=array_filter(
+			$trace,
+			function($frame) use($debug) {
+				return isset($frame['file']) &&
+					($frame['file']!=__FILE__ || $debug>1) &&
+					(empty($frame['function']) ||
+					!preg_match('/^(?:(?:trigger|user)_error|{closure}|'.
+						'__call|call_user_func)/',$frame['function']));
+			}
+		);
 		$css=$this->hive['HIGHLIGHT'] && is_file($file=__DIR__.'/'.self::CSS);
 		// Analyze stack trace
 		foreach ($trace as $frame) {
-			$line='';
-			if (isset($frame['file']) &&
-				($frame['file']!=__FILE__ || $this->hive['DEBUG']>1) &&
-				(empty($frame['function']) ||
-				!preg_match('/^(?:(?:trigger|user)_error|{closure}|'.
-					'__call|call_user_func)/',$frame['function']))) {
-				$line=$this->fixslashes($frame['file']).':'.
-					$frame['line'].' ';
-				if (isset($frame['class']))
-					$line.=$frame['class'].$frame['type'];
-				if (isset($frame['function']))
-					$line.=$frame['function'].
-						'('.$this->csv($frame['args']).')';
-				error_log('- '.$line);
-				$out.='&bull; '.($css?$this->highlight($line):$line).$eol;
-			}
+			$line=$this->fixslashes($frame['file']).':'.
+				$frame['line'].' ';
+			if (isset($frame['class']))
+				$line.=$frame['class'].$frame['type'];
+			if (isset($frame['function']))
+				$line.=$frame['function'].
+					'('.$this->csv($frame['args']).')';
+			error_log('- '.$line);
+			$out.='&bull; '.($css?$this->highlight($line):$line).$eol;
 		}
 		$this->hive['ERROR']=array(
 			'code'=>$code,
@@ -829,8 +829,7 @@ final class Base {
 					'<h1>'.$header.'</h1>'.$eol.
 					'<p>'.
 						$this->encode($text?:$req).'</p>'.$eol.
-					($out && $this->hive['DEBUG']?
-						('<pre>'.$eol.$out.'</pre>'.$eol):'').
+					($out && $debug?('<pre>'.$eol.$out.'</pre>'.$eol):'').
 				'</body>'.$eol.
 				'</html>';
 		}
@@ -1135,7 +1134,7 @@ final class Base {
 	function config($file) {
 		preg_match_all(
 			'/(?<=^|\n)(?:'.
-			'(?:;[^\n]*)|(?:<\?php.+\?>?)|'.
+			'(?:;[^\n]*)|(?:<\?php.+?\?>?)|'.
 			'(?:\[(.+?)\])|'.
 			'(.+?)\h*=\h*'.
 			'((?:\\\\\h*\r?\n|.+?)*)'.
@@ -1143,39 +1142,38 @@ final class Base {
 			file_get_contents($file),$matches,PREG_SET_ORDER);
 		if ($matches) {
 			$sec='globals';
-			foreach ($matches as $match)
-				if (isset($match[1])) {
-					if ($match[1])
-						$sec=$match[1];
-					elseif (in_array($sec,array('routes','maps')))
-						call_user_func_array(
-							array($this,trim($sec,'s')),
-							array_merge(
-								array($match[2]),
-								str_getcsv($match[3])));
-					else {
-						$args=array_map(
-							function($val) {
-								$quote=(isset($val[0]) && $val[0]=="\x00");
-								$val=trim($val);
-								if (!$quote && is_numeric($val))
-									return $val+0;
-								if (preg_match('/^\w+$/i',$val) &&
-									defined($val))
-									return constant($val);
-								return preg_replace(
-									'/\\\\\h*\r?\n/','',$val);
-							},
-							str_getcsv(
-								// Mark quoted strings with 0x00 whitespace
-								preg_replace('/"(.+?)"/',"\x00\\1",$match[3]))
-						);
-						call_user_func_array(array($this,'set'),
-							array_merge(
-								array($match[2]),
-								count($args)>1?array($args):$args));
-					}
+			foreach ($matches as $match) {
+				if (count($match)<2)
+					continue;
+				if ($match[1])
+					$sec=$match[1];
+				elseif (in_array($sec,array('routes','maps'))) {
+					call_user_func_array(
+						array($this,rtrim($sec,'s')),
+						array_merge(array($match[2]),str_getcsv($match[3])));
 				}
+				else {
+					$args=array_map(
+						function($val) {
+							$quote=(isset($val[0]) && $val[0]=="\x00");
+							$val=trim($val);
+							if (!$quote && is_numeric($val))
+								return $val+0;
+							if (preg_match('/^\w+$/i',$val) && defined($val))
+								return constant($val);
+							return preg_replace(
+								'/\\\\\h*\r?\n/','',$val);
+						},
+						str_getcsv(
+							// Mark quoted strings with 0x00 whitespace
+							preg_replace('/"(.+?)"/',"\x00\\1",$match[3]))
+					);
+					call_user_func_array(array($this,'set'),
+						array_merge(
+							array($match[2]),
+							count($args)>1?array($args):$args));
+				}
+			}
 		}
 	}
 
