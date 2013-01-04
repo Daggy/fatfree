@@ -53,7 +53,9 @@ abstract class Magic {
 	private function visible($key) {
 		if (property_exists($this,$key)) {
 			$ref=new \ReflectionProperty(get_class($this),$key);
-			return $ref->ispublic();
+			$out=$ref->ispublic();
+			unset($ref);
+			return $out;
 		}
 		return FALSE;
 	}

@@ -27,7 +27,7 @@ class Geo extends \Prefab {
 		$ref=new \DateTimeZone($zone);
 		$loc=$ref->getLocation();
 		$trn=$ref->getTransitions($now=time(),$now);
-		return array(
+		$out=array(
 			'offset'=>$ref->
 				getOffset(new \DateTime('now',new \DateTimeZone('GMT')))/3600,
 			'country'=>$loc['country_code'],
@@ -35,6 +35,8 @@ class Geo extends \Prefab {
 			'longitude'=>$loc['longitude'],
 			'dst'=>$trn[0]['isdst']
 		);
+		unset($ref);
+		return $out;
 	}
 
 	/**

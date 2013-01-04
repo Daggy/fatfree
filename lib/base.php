@@ -2098,6 +2098,7 @@ class ISO extends Prefab {
 			$out[$key=substr($val,strlen($prefix))]=
 				constant('self::'.$prefix.$key);
 		}
+		unset($ref);
 		return $out;
 	}
 
