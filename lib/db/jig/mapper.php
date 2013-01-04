@@ -239,13 +239,10 @@ class Mapper extends \DB\Cursor {
 	**/
 	function insert() {
 		$db=$this->db;
-		$max=ini_get('max_execution_time');
 		while (($id=dechex(microtime(TRUE)*100)) &&
 			($data=$db->read($this->file)) && isset($data[$id]) &&
-			!connection_aborted()) {
-			set_time_limit($max);
+			!connection_aborted())
 			usleep(mt_rand(0,100));
-		}
 		$this->id=$id;
 		$data[$id]=$this->document;
 		$db->write($this->file,$data);

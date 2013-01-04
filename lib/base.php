@@ -1029,15 +1029,12 @@ final class Base {
 				if (!$this->hive['QUIET']) {
 					if ($kbps) {
 						$ctr=0;
-						$max=ini_get('max_execution_time');
 						foreach (str_split($body,1024) as $part) {
 							// Throttle output
 							$ctr++;
 							if ($ctr/$kbps>$elapsed=microtime(TRUE)-$now &&
-								!connection_aborted()) {
-								set_time_limit($max);
+								!connection_aborted())
 								usleep(1e6*($ctr/$kbps-$elapsed));
-							}
 							echo $part;
 						}
 					}
@@ -1202,11 +1199,8 @@ final class Base {
 			filemtime($lock)+ini_get('max_execution_time')<microtime(TRUE))
 			// Stale lock
 			@unlink($lock);
-		$max=ini_get('max_execution_time');
-		while (!$handle=@fopen($lock,'x') && !connection_aborted()) {
-			set_time_limit($max);
+		while (!$handle=@fopen($lock,'x') && !connection_aborted())
 			usleep(mt_rand(0,100));
-		}
 		$out=$this->call($func,$args);
 		fclose($handle);
 		@unlink($lock);
