@@ -92,15 +92,17 @@ class Web extends Prefab {
 		$ctr=0;
 		$handle=fopen($file,'rb');
 		$start=microtime(TRUE);
+		$max=ini_get('max_execution_time');
 		while (!feof($handle) &&
 			($info=stream_get_meta_data($handle)) &&
 			!$info['timed_out'] && !connection_aborted()) {
 			if ($kbps) {
 				// Throttle output
 				$ctr++;
-				if ($ctr/$kbps>$elapsed=microtime(TRUE)-$start)
+				if ($ctr/$kbps>$elapsed=microtime(TRUE)-$start) {
+					set_time_limit($max);
 					usleep(1e6*($ctr/$kbps-$elapsed));
-				set_time_limit(ini_get('max_execution_time'));
+				}
 			}
 			// Send 1KiB and reset timer
 			echo fread($handle,1024);

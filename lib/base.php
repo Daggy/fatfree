@@ -1009,7 +1009,6 @@ final class Base {
 						list($headers,$body)=$data;
 						if (PHP_SAPI!='cli')
 							array_walk($headers,'header');
-						// Override headers
 						$this->expire($cached+$ttl-$now);
 					}
 					else
@@ -1030,12 +1029,15 @@ final class Base {
 				if (!$this->hive['QUIET']) {
 					if ($kbps) {
 						$ctr=0;
+						$max=ini_get('max_execution_time');
 						foreach (str_split($body,1024) as $part) {
 							// Throttle output
 							$ctr++;
-							if ($ctr/$kbps>$elapsed=microtime(TRUE)-$now)
+							if ($ctr/$kbps>$elapsed=microtime(TRUE)-$now &&
+								!connection_aborted()) {
+								set_time_limit($max);
 								usleep(1e6*($ctr/$kbps-$elapsed));
-							set_time_limit(ini_get('max_execution_time'));
+							}
 							echo $part;
 						}
 					}
@@ -1193,16 +1195,18 @@ final class Base {
 	function mutex($id,$func,$args=NULL) {
 		if (!is_dir($tmp=$this->hive['TEMP']))
 			mkdir($tmp,self::MODE,TRUE);
-		// Max lock duration
-		$max=ini_get('max_execution_time');
 		// Use filesystem lock
 		if (is_file($lock=$tmp.
 			$this->hash($this->hive['ROOT'].$this->hive['BASE']).'.'.
 			$this->hash($id).'.lock') &&
-			filemtime($lock)+$max<microtime(TRUE))
+			filemtime($lock)+ini_get('max_execution_time')<microtime(TRUE))
 			// Stale lock
 			@unlink($lock);
-		for (;!$handle=@fopen($lock,'x');usleep(mt_rand(0,100)));
+		$max=ini_get('max_execution_time');
+		while (!$handle=@fopen($lock,'x') && !connection_aborted()) {
+			set_time_limit($max);
+			usleep(mt_rand(0,100));
+		}
 		$out=$this->call($func,$args);
 		fclose($handle);
 		@unlink($lock);
