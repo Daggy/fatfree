@@ -26,6 +26,15 @@ class Geo extends Controller {
 				(isset($loc['request'])?
 					(' (IP address '.$loc['request'].')'):'')
 		);
+		$test->expect(
+			is_array($w=$geo->weather($loc['latitude'],$loc['longitude'])),
+			'Weather: '.
+				(isset($w['stationName'])?$w['stationName']:'').
+				(isset($w['temperature'])?
+					(', temperature: '.$w['temperature'].'&deg;C'):'').
+				(isset($w['windSpeed'])?
+					(', wind speed: '.((float)$w['windSpeed']).' knots'):'')
+		);
 		$f3->set('results',$test->results());
 	}
 
