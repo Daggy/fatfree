@@ -199,7 +199,8 @@ class Auth extends Prefab {
 				$realm
 			))
 			return TRUE;
-		header('WWW-Authenticate: Basic realm="'.$realm.'"');
+		if (PHP_SAPI!='cli')
+			header('WWW-Authenticate: Basic realm="'.$realm.'"');
 		$fw->error(401);
 	}
 
