@@ -312,7 +312,9 @@ $f3->error(404);
 
 ### Representational State Transfer (ReST)
 
-Fat-Free's architecture is based on the concept that HTTP URIs represent abstract Web resources (not limited to HTML) and each resource can move from one application state to another. Here's an example of a ReST interface:-
+Fat-Free's architecture is based on the concept that HTTP URIs represent abstract Web resources (not limited to HTML) and each resource can move from one application state to another. For this reason, F3 does not have any restrictions on the way you structure your application. If you prefer to use the [Model-View-Controller](http://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern, F3 can help you compartmentalize your application components to stick to this paradigm. On the other hand, the framework also supports the [Resource-Method-Representation](http://www.peej.co.uk/articles/rmr-architecture.html) pattern, and implementing it is more straightforward.
+
+Here's an example of a ReST interface:-
 
 ``` php
 class Item {
@@ -327,7 +329,7 @@ $f3->map('/cart/@item','Item');
 $f3->run();
 ```
 
-Fat-Free's `$f3->map()` method provides a ReST interface by mapping routes to the equivalent methods of an object or a PHP class. If your application receives an incoming HTTP request like `GET /cart/123`, Fat-Free will automatically transfer control to the object's or class' `get()` method. On the other hand, a `POST /cart/123` request will be routed to the `Item` class' `post()` method.
+Fat-Free's `$f3->map()` method provides a ReST interface by mapping HTTP methods in routes to the equivalent methods of an object or a PHP class. If your application receives an incoming HTTP request like `GET /cart/123`, Fat-Free will automatically transfer control to the object's or class' `get()` method. On the other hand, a `POST /cart/123` request will be routed to the `Item` class' `post()` method.
 
 Note: Browsers do not implement the HTTP `PUT` and `DELETE` methods in regular HTML forms. These and other ReST methods (`HEAD`, and `CONNECT`) are accessible only via AJAX calls to the server.
 
