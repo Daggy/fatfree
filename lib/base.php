@@ -836,7 +836,7 @@ final class Base {
 	}
 
 	/**
-		Mock environment
+		Mock HTTP request
 		@return NULL
 		@param $pattern string
 		@param $args array
@@ -917,24 +917,36 @@ final class Base {
 	}
 
 	/**
-		Match routes against incoming URI
-		@return NULL
+		Return TRUE if IPv4 address exists in DNSBL
+		@return bool
+		@param $ip string
 	**/
-	function run() {
-		if ($this->hive['DNSBL'] && !in_array($this->hive['IP'],
-			is_array($this->hive['EXEMPT'])?
-				$this->hive['EXEMPT']:
-				$this->split($this->hive['EXEMPT']))) {
+	function blacklisted($ip) {
+		if ($this->hive['DNSBL'] &&
+			!in_array($ip,
+				is_array($this->hive['EXEMPT'])?
+					$this->hive['EXEMPT']:
+					$this->split($this->hive['EXEMPT']))) {
 			// Reverse IPv4 dotted quad
-			$rev=implode('.',array_reverse(explode('.',$this->hive['IP'])));
+			$rev=implode('.',array_reverse(explode('.',$ip)));
 			foreach (is_array($this->hive['DNSBL'])?
 				$this->hive['DNSBL']:
 				$this->split($this->hive['DNSBL']) as $server)
 				// DNSBL lookup
 				if (gethostbyname($host=$rev.'.'.$server)!=$host)
-					// Spammer detected
-					$this->error(403);
+					return TRUE;
 		}
+		return FALSE;
+	}
+
+	/**
+		Match routes against incoming URI
+		@return NULL
+	**/
+	function run() {
+		if ($this->blacklisted($this->hive['IP']))
+			// Spammer detected
+			$this->error(403);
 		if (!$this->hive['ROUTES'])
 			// No routes defined
 			user_error(self::E_Routes);
@@ -955,14 +967,11 @@ final class Base {
 				// Process next route
 				continue;
 			if (isset($route[$this->hive['VERB']])) {
+				$parts=parse_url($req);
 				if ($this->hive['VERB']=='GET' &&
-					strlen($path=parse_url($req,PHP_URL_PATH))>1 &&
-					substr($path,-1)=='/') {
-					// Trailing slash in URL; Redirect
-					$query=parse_url($req,PHP_URL_QUERY);
-					$this->reroute(substr($path,0,-1).
-						($query?('?'.$query):''));
-				}
+					preg_match('/.+?\/$/',$parts['path']))
+					$this->reroute(substr($parts['path'],0,-1).
+						(isset($parts['query'])?('?'.$parts['query']):''));
 				list($handler,$ttl,$kbps)=$route[$this->hive['VERB']];
 				if (is_bool(strpos($url,'/*')))
 					foreach (array_keys($args) as $key)
@@ -1018,8 +1027,7 @@ final class Base {
 				$body=ob_get_clean();
 				if ($ttl && !error_get_last())
 					// Save to cache backend
-					$cache->set($hash,
-						array(headers_list(),$body),$ttl);
+					$cache->set($hash,array(headers_list(),$body),$ttl);
 				$this->hive['RESPONSE']=$body;
 				if (!$this->hive['QUIET']) {
 					if ($kbps) {
