@@ -26,7 +26,7 @@
 				<?php endforeach; ?>
 			</p>
 			<p><a href="http://fatfree.sf.net/"><img src="images/powered.png" title="Fat-Free Framework" /></a><br />
-			<p class="stats">Page rendered in <?php echo round(1e3*(microtime(TRUE)-$TIME),2); ?> msecs / Memory usage <?php echo round(memory_get_usage(TRUE)/1e3,1); ?> Kibytes</p>
+			<p class="stats"><?php echo Base::instance()->format('Page rendered in {0} msecs / Memory usage {1} Kibytes',round(1e3*(microtime(TRUE)-$TIME),2),round(memory_get_usage(TRUE)/1e3,1)); ?></p>
 		</div>
 	</body>
 </html>
