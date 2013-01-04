@@ -206,6 +206,7 @@ class Web extends Prefab {
 			$options['header'],
 			array(
 				'Host: '.$parts['host'],
+				'Accept-Encoding: gzip,deflate',
 				'User-Agent: Mozilla/5.0 '.'(compatible; '.php_uname('s').')',
 				'Connection: close'
 			)
@@ -242,6 +243,7 @@ class Web extends Prefab {
 				curl_setopt($curl,CURLOPT_USERAGENT,$options['user_agent']);
 			if (isset($options['content']))
 				curl_setopt($curl,CURLOPT_POSTFIELDS,$options['content']);
+			curl_setopt($curl,CURLOPT_ENCODING,'gzip,deflate');
 			curl_setopt($curl,CURLOPT_CONNECTTIMEOUT,
 				isset($options['timeout'])?
 					$options['timeout']:
@@ -271,12 +273,26 @@ class Web extends Prefab {
 		elseif (ini_get('allow_url_fopen')) {
 			// Use stream wrapper
 			$options['header']=implode($eol,$options['header']);
-			$out=@file_get_contents($url,FALSE,
+			$body=@file_get_contents($url,FALSE,
 				stream_context_create(array('http'=>$options)));
+			$headers=isset($http_response_header)?
+				$http_response_header:array();
+			$match=NULL;
+			foreach ($headers as $hdr)
+				if (preg_match('/Content-Encoding: (.+)/',$hdr,$match))
+					break;
+			if ($match)
+				switch ($match[1]) {
+					case 'gzip':
+						$body=gzdecode($body);
+						break;
+					case 'deflate':
+						$body=gzuncompress($body);
+						break;
+				}
 			$result=array(
-				'body'=>$out,
-				'headers'=>isset($http_response_header)?
-					$http_response_header:array(),
+				'body'=>$body,
+				'headers'=>$headers,
 				'engine'=>'stream-wrapper',
 				'cached'=>FALSE
 			);
@@ -287,10 +303,19 @@ class Web extends Prefab {
 			$body='';
 			for ($i=0;$i<$options['max_redirects'];$i++) {
 				if (isset($parts['user'],$parts['pass']))
-					$options['header']+=array(
-						'Authorization: Basic '.
+					$options['header']=array_merge(
+						$options['header'],
+						array(
+							'Authorization: Basic '.
 							base64_encode($parts['user'].':'.$parts['pass'])
+						)
 					);
+				foreach ($options['header'] as &$header)
+					if (preg_match('/^Host:/',$header)) {
+						$header='Host: '.$parts['host'];
+						unset($header);
+						break;
+					}
 				if ($parts['scheme']=='https') {
 					$parts['host']='ssl://'.$parts['host'];
 					$parts['port']=443;
@@ -320,9 +345,27 @@ class Web extends Prefab {
 					$content.=$str;
 				fclose($socket);
 				$html=explode($eol.$eol,$content);
-				$headers=array_merge($headers,explode($eol,$html[0]));
-				$body=isset($html[1])?$html[1]:'';
-				if (!$options['follow_location'] ||
+				$headers=array_merge($headers,$tmp=explode($eol,$html[0]));
+				$match=NULL;
+				foreach ($tmp as $hdr)
+					if (preg_match('/Content-Encoding: (.+)/',$hdr,$match))
+						break;
+				if (isset($html[1])) {
+					if ($match)
+						switch ($match[1]) {
+							case 'gzip':
+								$body=gzdecode($html[1]);
+								break;
+							case 'deflate':
+								$body=gzuncompress($html[1]);
+								break;
+						}
+					else
+						$body=$html[1];
+				}
+				else
+					$body='';
+				if ($options['follow_location'] &&
 					!preg_match('/Location: (.+?)'.preg_quote($eol).'/',
 					$html[0],$loc))
 					break;
