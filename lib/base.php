@@ -491,13 +491,13 @@ final class Base {
 	}
 
 	/**
-		Generate Base36+CRC32 hash code
+		Generate 64bit/base36 hash
 		@return string
 		@param $str
 	**/
 	function hash($str) {
 		return str_pad(base_convert(
-			sprintf('%u',crc32($str)),10,36),7,'0',STR_PAD_LEFT);
+			hexdec(substr(md5($str),-16)),10,36),11,'0',STR_PAD_LEFT);
 	}
 
 	/**
