@@ -231,7 +231,10 @@ final class Base {
 	**/
 	function get($key,$args=NULL) {
 		if (is_string($val=$this->ref($key,FALSE)) && $args)
-			return $this->format($val,$args);
+			return call_user_func_array(
+				array($this,'format'),
+				array_merge(array($val),is_array($args)?$args:array($args))
+			);
 		if (is_null($val)) {
 			// Attempt to retrieve from cache
 			if (Cache::instance()->exists($this->hash($key).'.var',$data))
@@ -597,29 +600,29 @@ final class Base {
 				if (isset($expr[2]))
 					switch ($expr[2]) {
 						case 'number':
-							if (empty($expr[3]))
-								return sprintf('%f',$args[$expr[1]]);
-							switch ($expr[3]) {
-								case 'integer':
-									return
-										number_format(
-											$args[$expr[1]],0,'',
-											$conv['thousands_sep']);
-								case 'currency':
-									return
-										$conv['currency_symbol'].
-										number_format(
-											$args[$expr[1]],
-											$conv['frac_digits'],
-											$conv['decimal_point'],
-											$conv['thousands_sep']);
-								case 'percent':
-									return
-										number_format(
-											$args[$expr[1]]*100,0,
-											$conv['decimal_point'],
-											$conv['thousands_sep']).'%';
-							}
+							if (isset($expr[3]))
+								switch ($expr[3]) {
+									case 'integer':
+										return
+											number_format(
+												$args[$expr[1]],0,'',
+												$conv['thousands_sep']);
+									case 'currency':
+										return
+											$conv['currency_symbol'].
+											number_format(
+												$args[$expr[1]],
+												$conv['frac_digits'],
+												$conv['decimal_point'],
+												$conv['thousands_sep']);
+									case 'percent':
+										return
+											number_format(
+												$args[$expr[1]]*100,0,
+												$conv['decimal_point'],
+												$conv['thousands_sep']).'%';
+								}
+							break;
 						case 'date':
 							return strftime(empty($expr[3]) ||
 								$expr[3]=='short'?'%x':'%A, %d %B %Y',
@@ -828,7 +831,9 @@ final class Base {
 					'<h1>'.$header.'</h1>'.$eol.
 					'<p>'.
 						$this->encode($text?:$req).'</p>'.$eol.
-					($out && $debug?('<pre>'.$eol.$out.'</pre>'.$eol):'').
+					($out && $debug?
+						('<pre'.($css?' class="php"':'').'>'.
+							$eol.$out.'</pre>'.$eol):'').
 				'</body>'.$eol.
 				'</html>';
 	}
@@ -1243,11 +1248,12 @@ final class Base {
 			if ($pre)
 				$pre=FALSE;
 			else
-				$out.='<span class="php'.
+				$out.='<span'.
 					(is_array($token)?
-						(' '.substr(strtolower(token_name($token[0])),2).'">'.
+						(' class="'.
+							substr(strtolower(token_name($token[0])),2).'">'.
 							$this->encode($token[1]).''):
-						('">'.$this->encode($token))).
+						('>'.$this->encode($token))).
 					'</span>';
 		return $out?:$text;
 	}
