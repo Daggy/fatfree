@@ -329,7 +329,6 @@ class Web extends Prefab {
 	/**
 		Specify the HTTP request engine to use; If not available,
 		fall back to an applicable substitute
-		available
 		@return string
 		@param $arg string
 	**/
