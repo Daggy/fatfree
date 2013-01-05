@@ -1384,8 +1384,9 @@ final class Base {
 			'HOST'=>$_SERVER['SERVER_NAME'],
 			'IP'=>isset($headers['Client-IP'])?
 				$headers['Client-IP']:
-				(isset($headers['X-Forwarded-For'])?
-					current(explode(',',$headers['X-Forwarded-For'])):
+				(isset($headers['X-Forwarded-For']) &&
+				($ip=strstr($headers['X-Forwarded-For'],',',TRUE))?
+					$ip:
 					(isset($_SERVER['REMOTE_ADDR'])?
 						$_SERVER['REMOTE_ADDR']:'')),
 			'JAR'=>$jar,
@@ -1472,7 +1473,7 @@ final class Cache {
 		if (!$this->dsn)
 			return FALSE;
 		$ndx=$this->prefix.'.'.$key;
-		$parts=explode('=',$this->dsn);
+		$parts=explode('=',$this->dsn,2);
 		switch ($parts[0]) {
 			case 'apc':
 				$raw=apc_fetch($ndx);
@@ -1513,7 +1514,7 @@ final class Cache {
 			return TRUE;
 		$ndx=$this->prefix.'.'.$key;
 		$data=$fw->serialize(array($val,microtime(TRUE),$ttl));
-		$parts=explode('=',$this->dsn);
+		$parts=explode('=',$this->dsn,2);
 		switch ($parts[0]) {
 			case 'apc':
 				return apc_store($ndx,$data,$ttl);
@@ -1547,7 +1548,7 @@ final class Cache {
 		if (!$this->dsn)
 			return;
 		$ndx=$this->prefix.'.'.$key;
-		$parts=explode('=',$this->dsn);
+		$parts=explode('=',$this->dsn,2);
 		switch ($parts[0]) {
 			case 'apc':
 				return apc_delete($ndx);
@@ -1574,7 +1575,7 @@ final class Cache {
 			return TRUE;
 		$regex='/'.preg_quote($this->prefix.'.','/').'.+?'.
 			preg_quote($suffix,'/').'/';
-		$parts=explode('=',$this->dsn);
+		$parts=explode('=',$this->dsn,2);
 		switch ($parts[0]) {
 			case 'apc':
 				$info=apc_cache_info('user');

@@ -189,8 +189,8 @@ class Mapper extends \DB\Cursor {
 		}
 		if (isset($options['order']))
 			foreach (array_reverse($fw->split($options['order'])) as $col) {
-				$parts=explode(' ',$col);
-				$order=isset($parts[1])?constant($parts[1]):SORT_ASC;
+				$parts=explode(' ',$col,2);
+				$order=empty($parts[1])?SORT_ASC:constant($parts[1]);
 				uasort(
 					$data,
 					function($val1,$val2) use($col,$order) {
