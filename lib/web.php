@@ -177,8 +177,6 @@ class Web extends Prefab {
 		@param $options array
 	**/
 	function request($url,array $options=NULL) {
-		if (!is_array($options))
-			$options=array();
 		$fw=Base::instance();
 		$parts=parse_url($url);
 		if (empty($parts['scheme'])) {
@@ -190,27 +188,35 @@ class Web extends Prefab {
 		}
 		elseif (!preg_match('/https?/',$parts['scheme']))
 			return FALSE;
+		if (!is_array($options))
+			$options=array();
 		if (empty($options['header']))
 			$options['header']=array();
 		elseif (is_string($options['header']))
 			$options['header']=array($options['header']);
-		if (isset($options['content']))
-			$options['header']=array_merge(
-				$options['header'],
-				array(
-					'Content-Type: application/x-www-form-urlencoded',
-					'Content-Length: '.strlen($options['content'])
-				)
-			);
-		$options['header']=array_merge(
-			$options['header'],
-			array(
-				'Host: '.$parts['host'],
-				'Accept-Encoding: gzip,deflate',
-				'User-Agent: Mozilla/5.0 '.'(compatible; '.php_uname('s').')',
-				'Connection: close'
-			)
+		foreach ($options['header'] as &$header)
+			if (preg_match('/^Host:/',$header)) {
+				$header='Host: '.$parts['host'];
+				unset($header);
+				break;
+			}
+		array_push($options['header'],
+			'Host: '.$parts['host'],
+			'Accept-Encoding: gzip,deflate',
+			'User-Agent: Mozilla/5.0 (compatible; '.php_uname('s').')',
+			'Connection: close'
 		);
+		if (isset($options['content']))
+			array_push($options['header'],
+				'Content-Type: application/x-www-form-urlencoded',
+				'Content-Length: '.strlen($options['content'])
+			);
+		if (isset($parts['user'],$parts['pass']))
+			array_push($options['header'],
+				'Authorization: Basic '.
+					base64_encode($parts['user'].':'.$parts['pass'])
+			);
+		$options['header']=array_unique($options['header']);
 		$options+=array(
 			'method'=>'GET',
 			'header'=>$options['header'],
@@ -258,17 +264,18 @@ class Web extends Prefab {
 			);
 			curl_setopt($curl,CURLOPT_SSL_VERIFYPEER,FALSE);
 			ob_start();
-			$out=curl_exec($curl);
+			curl_exec($curl);
 			curl_close($curl);
+			$body=ob_get_clean();
 			$result=array(
-				'body'=>ob_get_clean(),
+				'body'=>$body,
 				'headers'=>$headers,
 				'engine'=>'cURL',
 				'cached'=>FALSE
 			);
 		}
 		elseif ($parts['scheme']=='https' && !extension_loaded('openssl'))
-			// short-circuit
+			// Short-circuit
 			return FALSE;
 		elseif (ini_get('allow_url_fopen')) {
 			// Use stream wrapper
@@ -301,76 +308,55 @@ class Web extends Prefab {
 			// Use low-level TCP/IP socket
 			$headers=array();
 			$body='';
-			for ($i=0;$i<$options['max_redirects'];$i++) {
-				if (isset($parts['user'],$parts['pass']))
-					$options['header']=array_merge(
-						$options['header'],
-						array(
-							'Authorization: Basic '.
-							base64_encode($parts['user'].':'.$parts['pass'])
-						)
-					);
-				foreach ($options['header'] as &$header)
-					if (preg_match('/^Host:/',$header)) {
-						$header='Host: '.$parts['host'];
-						unset($header);
-						break;
-					}
-				if ($parts['scheme']=='https') {
-					$parts['host']='ssl://'.$parts['host'];
-					$parts['port']=443;
-				}
-				else
-					$parts['port']=80;
-				if (empty($parts['path']))
-					$parts['path']='/';
-				if (empty($parts['query']))
-					$parts['query']='';
-				$socket=@fsockopen($parts['host'],$parts['port']);
-				if (!$socket)
-					return FALSE;
-				stream_set_blocking($socket,TRUE);
-				fputs($socket,$options['method'].' '.$parts['path'].
-					($parts['query']?('?'.$parts['query']):'').' '.
-					'HTTP/1.0'.$eol
-				);
-				fputs($socket,implode($eol,$options['header']).$eol.$eol);
-				if (isset($options['content']))
-					fputs($socket,$options['content'].$eol);
-				// Get response
-				$content='';
-				while (!feof($socket) &&
-					($info=stream_get_meta_data($socket)) &&
-					!$info['timed_out'] && $str=fgets($socket,4096))
-					$content.=$str;
-				fclose($socket);
-				$html=explode($eol.$eol,$content);
-				$headers=array_merge($headers,$tmp=explode($eol,$html[0]));
-				$match=NULL;
-				foreach ($tmp as $hdr)
-					if (preg_match('/Content-Encoding: (.+)/',$hdr,$match))
-						break;
-				if (isset($html[1])) {
-					if ($match)
-						switch ($match[1]) {
-							case 'gzip':
-								$body=gzdecode($html[1]);
-								break;
-							case 'deflate':
-								$body=gzuncompress($html[1]);
-								break;
-						}
-					else
-						$body=$html[1];
-				}
-				else
-					$body='';
-				if ($options['follow_location'] &&
-					!preg_match('/Location: (.+?)'.preg_quote($eol).'/',
-					$html[0],$loc))
+			if ($parts['scheme']=='https') {
+				$parts['host']='ssl://'.$parts['host'];
+				$parts['port']=443;
+			}
+			else
+				$parts['port']=80;
+			if (empty($parts['path']))
+				$parts['path']='/';
+			if (empty($parts['query']))
+				$parts['query']='';
+			$socket=@fsockopen($parts['host'],$parts['port']);
+			if (!$socket)
+				return FALSE;
+			stream_set_blocking($socket,TRUE);
+			fputs($socket,$options['method'].' '.$parts['path'].
+				($parts['query']?('?'.$parts['query']):'').' '.
+				'HTTP/1.0'.$eol
+			);
+			fputs($socket,implode($eol,$options['header']).$eol.$eol);
+			if (isset($options['content']))
+				fputs($socket,$options['content'].$eol);
+			// Get response
+			$content='';
+			while (!feof($socket) &&
+				($info=stream_get_meta_data($socket)) &&
+				!$info['timed_out'] && $str=fgets($socket,4096))
+				$content.=$str;
+			fclose($socket);
+			$html=explode($eol.$eol,$content,2);
+			$headers=array_merge($headers,$tmp=explode($eol,$html[0]));
+			$match=NULL;
+			foreach ($tmp as $hdr)
+				if (preg_match('/Content-Encoding: (.+)/',$hdr,$match))
 					break;
-				$url=$loc[1];
-				$parts=parse_url($url);
+			$body=isset($html[1])?$html[1]:'';
+			if ($match)
+				switch ($match[1]) {
+					case 'gzip':
+						$body=gzdecode($body);
+						break;
+					case 'deflate':
+						$body=gzuncompress($body);
+						break;
+				}
+			if ($options['follow_location'] &&
+				preg_match('/Location: (.+?)'.preg_quote($eol).'/',
+				$html[0],$loc)) {
+				$options['max_redirects']--;
+				return $this->request($loc[1],$options);
 			}
 			$result=array(
 				'body'=>$body,
