@@ -60,23 +60,35 @@ class Web extends Controller {
 				\View::instance()->render('js/underscore.min.js'),
 			'Minify Javascript ('.round(1e3*(microtime(TRUE)-$now),1).' msecs)'
 		);
-		$now=microtime(TRUE);
-		$test->expect(
-			$req=$web->request($url='http://www.google.com/'),
-			'HTTP request ('.$url.') using '.$req['engine'].' '.
-			'('.round(1e3*(microtime(TRUE)-$now),1).' msecs)'
-		);
-		$now=microtime(TRUE);
-		$test->expect(
-			$web->request('pingback2?page=pingback/client'),
-			'HTTP request (local resource: '.
-			round(1e3*(microtime(TRUE)-$now),1).' msecs)'
-		);
-		$test->expect(
-			is_array($rss=$web->rss(
-				$url='https://news.google.com/news/feeds?output=rss')),
-			'RSS/Atom feed ('.$url.')'
-		);
+		foreach ($f3->split('curl,stream,socket') as $wrapper) {
+			if (preg_match('/curl/i',$wrapper) &&
+				extension_loaded('curl') ||
+				preg_match('/stream/i',$wrapper) &&
+				ini_get('allow_url_fopen') ||
+				preg_match('/socket/i',$wrapper) &&
+				function_exists('fsockopen')) {
+				$web->engine($wrapper);
+				$now=microtime(TRUE);
+				$test->expect(
+					$req=$web->request($url='http://www.google.com/'),
+					'HTTP request ('.$url.') using '.$req['engine'].' '.
+					'('.round(1e3*(microtime(TRUE)-$now),1).' msecs)'
+				);
+				$now=microtime(TRUE);
+				$test->expect(
+					$web->request('pingback2?page=pingback/client'),
+					'HTTP request (local resource: '.
+					round(1e3*(microtime(TRUE)-$now),1).' msecs)'
+				);
+				$now=microtime(TRUE);
+				$test->expect(
+					is_array($rss=$web->rss(
+						$url='https://news.google.com/news/feeds?output=rss')),
+					'RSS/Atom feed ('.$url.') '.
+					round(1e3*(microtime(TRUE)-$now),1).' msecs'
+				);
+			}
+		}
 		$f3->set('ESCAPE',FALSE);
 		$f3->set('results',$test->results());
 	}
