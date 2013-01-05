@@ -178,21 +178,16 @@ class Mapper extends \DB\Cursor {
 		$args=array();
 		if ($filter) {
 			if (is_array($filter)) {
-				$params=isset($filter[1]) && is_array($filter[1])?
+				$args=isset($filter[1]) && is_array($filter[1])?
 					$filter[1]:
 					array_slice($filter,1,NULL,TRUE);
+				$args=is_array($args)?$args:array(1=>$args);
 				list($filter)=$filter;
-				$args+=is_array($params)?$params:array(1=>$params);
 			}
 			$sql.=' WHERE '.$filter;
 		}
-		if ($options['group']) {
-			$params=array();
-			if (is_array($options['group']))
-				list($options['group'],$params)=$options['group'];
-			$args+=is_array($params)?$params:array($params);
+		if ($options['group'])
 			$sql.=' GROUP BY '.$options['group'];
-		}
 		if ($options['order'])
 			$sql.=' ORDER BY '.$options['order'];
 		if ($options['limit'])
@@ -358,14 +353,14 @@ class Mapper extends \DB\Cursor {
 	**/
 	function erase($filter=NULL) {
 		if ($filter) {
-			$params=array();
+			$args=array();
 			if (is_array($filter)) {
-				$params=isset($filter[1]) && is_array($filter[1])?
+				$args=isset($filter[1]) && is_array($filter[1])?
 					$filter[1]:
 					array_slice($filter,1,NULL,TRUE);
+				$args=is_array($args)?$args:array(1=>$args);
 				list($filter)=$filter;
 			}
-			$args=is_array($params)?$params:array(1=>$params);
 			return $this->db->
 				exec('DELETE FROM '.$this->table.' WHERE '.$filter.';',$args);
 		}

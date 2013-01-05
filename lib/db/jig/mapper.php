@@ -150,24 +150,22 @@ class Mapper extends \DB\Cursor {
 		if ($filter) {
 			if (!is_array($filter))
 				return FALSE;
-			// Prefix variables to prevent conflict with user code
+			// Prefix local variables to avoid conflict with user code
 			$_self=$this;
-			$_args=array();
-			$params=isset($filter[1]) && is_array($filter[1])?
+			$_args=isset($filter[1]) && is_array($filter[1])?
 				$filter[1]:
 				array_slice($filter,1,NULL,TRUE);
-			list($filter)=$filter;
-			$_args+=is_array($params)?$params:array(1=>$params);
-			$_expr=$filter;
+			$_args=is_array($_args)?$_args:array(1=>$_args);
+			list($_expr)=$filter;
 			$data=array_filter($data,
-				function($_) use($_expr,$_args,$_self) {
-					extract($_);
+				function($_row) use($_expr,$_args,$_self) {
+					extract($_row);
 					$_ctr=0;
-					// Evaluate user code
+					// Evaluate pseudo-SQL expression
 					return eval('return '.
 						preg_replace_callback(
 							'/(\:\w+)|(\?)/',
-							function($token) use($_args,$_self,&$_ctr) {
+							function($token) use($_args,&$_ctr) {
 								// Parameterized query
 								if ($token[1])
 									// Named
