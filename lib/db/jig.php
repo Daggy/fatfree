@@ -61,7 +61,7 @@ class Jig {
 		$fw=\Base::instance();
 		switch ($this->format) {
 			case self::FORMAT_JSON:
-				$out=json_encode($data);
+				$out=json_encode($data,@constant('JSON_PRETTY_PRINT'));
 				break;
 			case self::FORMAT_Serialized:
 				$out=$fw->serialize($data);
