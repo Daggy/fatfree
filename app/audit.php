@@ -100,6 +100,46 @@ class Audit extends Controller {
 			$valid->isreserved('240.241.242.243'),
 			'Reserved IP range'
 		);
+		$type='American Express';
+		$test->expect(
+			$valid->card('378282246310005')==$type &&
+			$valid->card('371449635398431')==$type &&
+			$valid->card('378734493671000')==$type,
+			$type
+		);
+		$type='Diners Club';
+		$test->expect(
+			$valid->card('30569309025904')==$type &&
+			$valid->card('38520000023237')==$type,
+			$type
+		);
+		$type='Discover';
+		$test->expect(
+			$valid->card('6011111111111117')==$type &&
+			$valid->card('6011000990139424')==$type,
+			$type
+		);
+		$type='JCB';
+		$test->expect(
+			$valid->card('3530111333300000')==$type &&
+			$valid->card('3566002020360505')==$type,
+			$type
+		);
+		$type='MasterCard';
+		$test->expect(
+			$valid->card('5555555555554444')==$type &&
+			$valid->card('5105105105105100')==$type,
+			$type
+		);
+		$type='Visa';
+		$test->expect(
+			$valid->card('4222222222222')==$type &&
+			$valid->card('4111111111111111')==$type &&
+			$valid->card('4012888888881881')==$type,
+			$type
+		);
+		
+		
 		$f3->set('results',$test->results());
 	}
 
