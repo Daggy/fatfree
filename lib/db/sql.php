@@ -105,6 +105,7 @@ class SQL extends \PDO {
 		$fw=\Base::instance();
 		$cache=\Cache::instance();
 		foreach (array_combine($cmds,$args) as $cmd=>$arg) {
+			$now=microtime(TRUE);
 			$keys=$vals=array();
 			if ($fw->get('CACHE') && $ttl && ($cached=$cache->exists(
 				$hash=$fw->hash($cmd.$fw->stringify($arg)).'.sql',
@@ -158,7 +159,8 @@ class SQL extends \PDO {
 					user_error('PDO: '.$error[2]);
 				}
 			}
-			$this->log.=date('r').' '.
+			$this->log.=date('r').' ('.
+				sprintf('%.1f',1e3*(microtime(TRUE)-$now)).'ms) '.
 				preg_replace($keys,$vals,$cmd,1).PHP_EOL;
 		}
 		if ($this->trans && $auto)
