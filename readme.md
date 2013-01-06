@@ -1604,18 +1604,28 @@ There's also a `select()` method that's similar to `find()` but provides more fi
 
 ``` php
 select(
-    fields,
-    criteria,
+    'foo, bar, MIN(baz) AS lowest',
+    'foo > ?,
     array(
-        'group'=>...,
-        'order'=>...,
-        'limit'=>...,
-        'offset'=>...
+        'group'=>'foo, bar',
+        'order'=>'baz ASC',
+        'limit'=>5,
+        'offset'=>3
     )
 );
 ```
 
 Much like the `find()` method, `select()` does not alter the mapper object's contents. It only serves as a convenience method for querying a mapped table. The return value of both methods is an array of mapper objects. Using `dry()` to determine whether a record was found by an of these methods is inappropriate. If no records match the `find()` or `select()` criteria, the return value is an empty array.
+
+### Profiling
+
+If you ever want to find out which SQL statements issued directly by your application (or indirectly thru mapper objects) are causing performance bottlenecks, you can do so with a simple:-
+
+``` php
+echo $db->log();
+```
+
+F3 keeps track of all commands issued to the underlying SQL database driver, as well as the time it takes for each statement to complete - just the right information you need to tweak application performance.
 
 ### Sometimes It Just Ain't Enough
 
@@ -2226,7 +2236,7 @@ To file a bug report, visit [https://github.com/bcosca/fatfree/issues](https://g
 
 ### Fair Licensing
 
-Fat-Free Framework is free and released as open source software covered by the terms of the GNU Public License (GPL v3). You may not use the software, documentation, and samples except in compliance with the license. If the terms and conditions of this license are too restrictive for your use, alternative licensing is available for a fee.
+Fat-Free Framework is free and released as open source software covered by the terms of the GNU Public License (GPL v3). You may not use the software, documentation, and samples except in compliance with the license. If the terms and conditions of this license are too restrictive for your use, alternative licensing is available for a reasonable fee.
 If you feel that this software is one great weapon to have in your programming arsenal, it saves you a lot of time and money, use it for commercial gain or in your business organization, please consider making a donation to the project. A significant amount of time, effort, and money has been spent on this project. Your donations help keep this project alive and the development team motivated. Donors and sponsors get priority support (24-hour response time on business days).
 
 ### Credits
