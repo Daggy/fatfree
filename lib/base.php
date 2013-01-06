@@ -1589,7 +1589,7 @@ final class Cache {
 					$this->ref,'slabs') as $slabs)
 					foreach (array_keys($slabs) as $id)
 						foreach (memcache_get_extended_stats(
-							$this->ref,'cachedump',(int)$id) as $data)
+							$this->ref,'cachedump',floor($id)) as $data)
 							if (is_array($data))
 								foreach ($data as $key=>$val)
 									if (preg_match($regex,$key) &&

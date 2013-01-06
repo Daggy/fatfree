@@ -306,7 +306,7 @@ class Image {
 		imagefill($this->data,0,0,IMG_COLOR_TRANSPARENT);
 		$hash=sha1($str);
 		$ctr=count($sprites);
-		$dim=$blocks*(int)($size/$blocks)*2/$blocks;
+		$dim=$blocks*floor($size/$blocks)*2/$blocks;
 		for ($j=0,$y=ceil($blocks/2);$j<$y;$j++)
 			for ($i=$j,$x=$blocks-1-$j;$i<$x;$i++) {
 				$sprite=imagecreatetruecolor($dim,$dim);
