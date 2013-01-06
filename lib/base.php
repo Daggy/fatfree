@@ -646,26 +646,29 @@ final class Base {
 	function language($code) {
 		$this->languages=array(self::FALLBACK);
 		// Validate string/header
-		if (!preg_match('/^(\w{2})(?:_(\w{2}))?\b/',strtolower($code),$parts))
-			return self::FALLBACK;
-		if ($parts[1]!=self::FALLBACK)
-			// Generic language
-			array_unshift($this->languages,$parts[1]);
-		if (isset($parts[2]))
-			// Specific language
-			array_unshift($this->languages,$parts[0]);
+		foreach (explode(',',$code) as $language) {
+			if (!preg_match('/^(\w{2})(?:_(\w{2}))?\b/',
+				strtolower($language),$parts))
+				return self::FALLBACK;
+			if ($parts[1]!=self::FALLBACK)
+				// Generic language
+				array_unshift($this->languages,$parts[1]);
+			if (isset($parts[2]))
+				// Specific language
+				array_unshift($this->languages,$parts[0]);
+		}
 		$this->locales=array();
 		$windows=preg_match('/^win/i',PHP_OS);
-		foreach ($this->languages as $language) {
+		foreach ($this->languages as $locale) {
 			if ($windows) {
-				$parts=explode('_',$language);
-				$language=@constant('ISO::LC_'.$parts[0]);
+				$parts=explode('_',$locale);
+				$locale=@constant('ISO::LC_'.$parts[0]);
 				if (isset($parts[1]) &&
 					$country=@constant('ISO::CC_'.$parts[1]))
-					$language.='_'.$country;
+					$locale.='_'.$country;
 			}
-			$this->locales[]=$language;
-			$this->locales[]=$language.'.'.$this->hive['ENCODING'];
+			$this->locales[]=$locale;
+			$this->locales[]=$locale.'.'.$this->hive['ENCODING'];
 		}
 		return $parts[0];
 	}
@@ -1363,6 +1366,10 @@ final class Base {
 				'httponly'=>TRUE
 			)
 		);
+		$language=self::FALLBACK;
+		if (isset($headers['Accept-Language']))
+			$language=str_replace('-','_',preg_replace(
+				'/;q=.+?(?=,|$)/','',$headers['Accept-Language']));
 		// Default configuration
 		$this->hive=array(
 			'AJAX'=>isset($headers['X-Requested-With']) &&
@@ -1390,10 +1397,7 @@ final class Base {
 					(isset($_SERVER['REMOTE_ADDR'])?
 						$_SERVER['REMOTE_ADDR']:'')),
 			'JAR'=>$jar,
-			'LANGUAGE'=>$this->language(
-				isset($headers['Accept-Language'])?
-					str_replace('-','_',$headers['Accept-Language']):
-					self::FALLBACK),
+			'LANGUAGE'=>$this->language($language),
 			'LOCALES'=>'./',
 			'LOGS'=>'./',
 			'ONERROR'=>NULL,
