@@ -60,6 +60,17 @@ class Matrix extends Controller {
 			),
 			'Change row key'
 		);
+		$test->expect(
+			$matrix->calendar('2001-09-11')==array(
+				array(6=>1),
+				array(0=>2,1=>3,2=>4,3=>5,4=>6,5=>7,6=>8),
+				array(0=>9,1=>10,2=>11,3=>12,4=>13,5=>14,6=>15),
+				array(0=>16,1=>17,2=>18,3=>19,4=>20,5=>21,6=>22),
+				array(0=>23,1=>24,2=>25,3=>26,4=>27,5=>28,6=>29),
+				array(0=>30)
+			),
+			'Generate calendar (Sunday, first day of week)'
+		);
 		$f3->set('results',$test->results());
 	}
 
