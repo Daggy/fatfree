@@ -47,7 +47,7 @@ class SQL extends Controller {
 			);
 			$test->expect(
 				$db->log(),
-				'SQL log available'
+				'SQL profiler active'
 			);
 			$db->exec(
 				'INSERT INTO movies (title,director,year) '.
