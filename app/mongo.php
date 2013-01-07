@@ -31,6 +31,11 @@ class Mongo extends Controller {
 					is_object($movie),
 					'Mapper instantiated'
 				);
+				$movie->load(array('title'=>'The Hobbit'));
+				$test->expect(
+					$movie->dry(),
+					'Mapper is dry'
+				);
 				$movie->set('title','Donnie Brasco');
 				$movie->set('director','Mike Newell');
 				$movie->set('year',1997);
