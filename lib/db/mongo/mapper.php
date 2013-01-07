@@ -108,8 +108,8 @@ class Mapper extends \DB\Cursor {
 		);
 		if ($options['group']) {
 			$fw=\Base::instance();
-			$tmp=$this->db->selectcollection(
-				$fw->get('HOST').'.'.$fw->get('BASE').'.'.uniqid().'.tmp');
+			$tmp=$this->db->
+				{$fw->get('HOST').'.'.$fw->get('BASE').'.'.uniqid().'.tmp'};
 			$tmp->batchinsert(
 				$this->collection->group(
 					$options['group']['keys'],
@@ -265,7 +265,7 @@ class Mapper extends \DB\Cursor {
 	**/
 	function __construct(\DB\Mongo $db,$collection) {
 		$this->db=$db;
-		$this->collection=$db->selectcollection($collection);
+		$this->collection=$db->{$collection};
 		$this->reset();
 	}
 

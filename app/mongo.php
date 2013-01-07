@@ -36,6 +36,10 @@ class Mongo extends Controller {
 				$movie->set('director','Mike Newell');
 				$movie->set('year',1997);
 				$movie->save();
+				$test->expect(
+					$db->log(),
+					'MongoDB profiler'
+				);
 				$movie->load(array('title'=>'Donnie Brasco'));
 				$test->expect(
 					$movie->count()==1 &&
