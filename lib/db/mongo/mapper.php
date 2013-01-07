@@ -97,7 +97,7 @@ class Mapper extends \DB\Cursor {
 		@param $filter array
 		@param $options array
 	**/
-	function select($fields,$filter=NULL,array $options=NULL) {
+	function select($fields=NULL,$filter=NULL,array $options=NULL) {
 		if (!$options)
 			$options=array();
 		$options+=array(
