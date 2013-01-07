@@ -28,14 +28,17 @@ class Jig {
 		//! Storage location
 		$dir,
 		//! Current storage format
-		$format;
+		$format,
+		//! Jig log
+		$log;
 
 	/**
 		Read data from file
 		@return array
-		@param $file
+		@param $file string
+		@param $frame string
 	**/
-	function read($file) {
+	function read($file,$frame=NULL) {
 		$fw=\Base::instance();
 		if (!is_file($dst=$this->dir.$file))
 			return array();
@@ -56,8 +59,9 @@ class Jig {
 		@return int
 		@param $file string
 		@param $data array
+		@param $frame string
 	**/
-	function write($file,array $data=NULL) {
+	function write($file,array $data=NULL,$frame=NULL) {
 		$fw=\Base::instance();
 		switch ($this->format) {
 			case self::FORMAT_JSON:
@@ -67,7 +71,26 @@ class Jig {
 				$out=$fw->serialize($data);
 				break;
 		}
-		return $fw->write($this->dir.$file,$out);
+		$out=$fw->write($this->dir.$file,$out);
+		return $out;
+	}
+
+	/**
+		Return SQL profiler results
+		@return string
+	**/
+	function log() {
+		return $this->log;
+	}
+
+	/**
+		Jot down log entry
+		@return NULL
+		@param $frame string
+	**/
+	function jot($frame) {
+		if ($frame)
+			$this->log.=date('r').' '.$frame.PHP_EOL;
 	}
 
 	/**
