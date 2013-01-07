@@ -35,7 +35,7 @@ class Mongo extends \MongoDB {
 		$fw=\Base::instance();
 		$cursor=$this->selectcollection('system.profile')->find();
 		foreach (iterator_to_array($cursor) as $frame)
-			if (!preg_match('/\.system\.profile$/',$frame['ns']))
+			if (!preg_match('/\.system\..+$/',$frame['ns']))
 				$this->log.=date('r',$frame['ts']->sec).' ('.
 					sprintf('%.1f',$frame['millis']).'ms) '.
 					$frame['ns'].' ['.$frame['op'].'] '.
