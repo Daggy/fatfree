@@ -177,7 +177,7 @@ class SQL extends \PDO {
 	}
 
 	/**
-		Return SQL command history
+		Return SQL profiler results
 		@return string
 	**/
 	function log() {

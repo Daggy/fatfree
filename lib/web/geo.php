@@ -15,7 +15,7 @@
 
 namespace Web;
 
-//! Geo plugin
+//! Geo plug-in
 class Geo extends \Prefab {
 
 	/**

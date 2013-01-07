@@ -13,7 +13,7 @@
 	Please see the license.txt file for more information.
 */
 
-//! SMTP plugin
+//! SMTP plug-in
 class SMTP extends Magic {
 
 	//@{ Locale-specific error/exception messages

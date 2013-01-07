@@ -13,7 +13,7 @@
 	Please see the license.txt file for more information.
 */
 
-//! Authorization/authentication plugin
+//! Authorization/authentication plug-in
 class Auth extends Prefab {
 
 	//@{ Error messages
