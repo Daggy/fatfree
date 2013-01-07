@@ -26,7 +26,6 @@ class Mongo extends Controller {
 				'DB wrapper initialized (Version '.\Mongo::VERSION.')'
 			);
 			if ($db) {
-				$db->drop();
 				$movie=new \DB\Mongo\Mapper($db,'movies');
 				$test->expect(
 					is_object($movie),
@@ -38,7 +37,7 @@ class Mongo extends Controller {
 				$movie->save();
 				$test->expect(
 					$db->log(),
-					'MongoDB profiler'
+					'MongoDB profiler active'
 				);
 				$movie->load(array('title'=>'Donnie Brasco'));
 				$test->expect(
@@ -207,6 +206,7 @@ class Mongo extends Controller {
 					empty($_SESSION['foo']),
 					'Session destroyed'
 				);
+				$db->drop();
 			}
 		}
 		$f3->set('results',$test->results());
