@@ -329,6 +329,7 @@ class Mapper extends \DB\Cursor {
 		@return NULL
 	**/
 	function reset() {
+		$this->id=NULL;
 		$this->document=array();
 		parent::reset();
 	}
